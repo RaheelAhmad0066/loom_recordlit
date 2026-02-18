@@ -1,12 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { Video, Play, ArrowRight, Star, Sparkles, Shield, Zap, Globe, MonitorPlay, Share2, Cloud, CheckCircle, Menu, X } from 'lucide-react';
+import { Video, Play, ArrowRight, Sparkles, Shield, Zap, Globe, MonitorPlay, Share2, Cloud, CheckCircle, Menu, X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
   const features = [
     {
@@ -48,14 +52,14 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[hsl(var(--background))]">
+    <div className="flex min-h-screen flex-col bg-[hsl(var(--background))] overflow-x-hidden">
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-[hsl(var(--border)/0.5)] glass">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25">
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform">
                 <Video className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
@@ -64,7 +68,7 @@ export default function LandingPage() {
             </Link>
 
             {/* Desktop Nav */}
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden md:flex items-center gap-8">
               <Link href="#features" className="text-sm font-medium text-[hsl(var(--muted-foreground))] transition-colors hover:text-[hsl(var(--foreground))]">
                 Features
               </Link>
@@ -82,7 +86,7 @@ export default function LandingPage() {
                 Sign In
               </Link>
               <Link href="/login">
-                <Button variant="default" size="sm" className="rounded-full px-5 shadow-md shadow-[hsl(var(--primary)/0.25)]">
+                <Button variant="default" size="sm" className="rounded-full px-5 shadow-md shadow-[hsl(var(--primary)/0.25)] hover:shadow-lg transition-all">
                   Get Started Free
                 </Button>
               </Link>
@@ -107,15 +111,17 @@ export default function LandingPage() {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] py-2.5 px-2 rounded-lg hover:bg-[hsl(var(--accent))] transition-colors"
+                    className="text-sm font-medium text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] py-3 px-4 rounded-lg hover:bg-[hsl(var(--accent))] transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
                   </Link>
                 ))}
-                <Link href="/login" className="text-sm font-semibold text-[hsl(var(--primary))] py-2.5 px-2">
-                  Sign In →
-                </Link>
+                <div className="pt-2 px-4">
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                    <Button className="w-full justify-center">Sign In</Button>
+                  </Link>
+                </div>
               </div>
             </div>
           )}
@@ -124,103 +130,139 @@ export default function LandingPage() {
 
       <main className="flex-1">
         {/* ──────────── Hero Section ──────────── */}
-        <section className="relative overflow-hidden pt-16 pb-12 sm:pt-24 sm:pb-20 lg:pt-32 lg:pb-28">
+        <section className="relative overflow-hidden pt-20 pb-16 sm:pt-32 sm:pb-24 lg:pt-40 lg:pb-32">
           {/* Background effects */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(ellipse,hsl(var(--primary)/0.12),transparent_70%)]" />
-            <div className="absolute top-[30%] left-[-5%] w-72 h-72 bg-violet-500/[0.06] rounded-full blur-3xl" />
-            <div className="absolute top-[10%] right-[-5%] w-96 h-96 bg-sky-500/[0.04] rounded-full blur-3xl" />
+          <div className="absolute inset-0 -z-10 pointer-events-none">
+            <div className="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[1000px] h-[800px] bg-[radial-gradient(ellipse,hsl(var(--primary)/0.15),transparent_70%)] opacity-70" />
+            <div className="absolute top-[20%] left-[-10%] w-96 h-96 bg-violet-500/[0.1] rounded-full blur-3xl" />
+            <div className="absolute bottom-[10%] right-[-10%] w-[500px] h-[500px] bg-sky-500/[0.1] rounded-full blur-3xl" />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+            <div className="grid gap-16 lg:grid-cols-2 lg:gap-24 items-center">
               {/* Left Content */}
-              <div className="flex flex-col gap-5 animate-fade-in-up text-center lg:text-left">
-                <div className="inline-flex items-center rounded-full border border-[hsl(var(--primary)/0.2)] bg-[hsl(var(--primary)/0.06)] px-3.5 py-1.5 text-sm font-medium text-[hsl(var(--primary))] w-fit mx-auto lg:mx-0">
-                  <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                  Free forever · No credit card
+              <div className="flex flex-col gap-8 animate-fade-in-up text-center lg:text-left z-10">
+                <div className="inline-flex items-center rounded-full border border-[hsl(var(--primary)/0.2)] bg-[hsl(var(--primary)/0.08)] px-4 py-1.5 text-sm font-medium text-[hsl(var(--primary))] w-fit mx-auto lg:mx-0 shadow-sm backdrop-blur-sm">
+                  <Sparkles className="mr-2 h-3.5 w-3.5" />
+                  Free forever · No credit card required
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4.25rem] font-extrabold tracking-tight text-[hsl(var(--foreground))] leading-[1.1]">
-                  Screen Recording,{' '}
-                  <span className="text-gradient">Simplified.</span>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[hsl(var(--foreground))] leading-[1.1]">
+                  Screen Recording <br />
+                  <span className="text-gradient">Reimagined.</span>
                 </h1>
 
-                <p className="max-w-[540px] text-base sm:text-lg text-[hsl(var(--muted-foreground))] leading-relaxed mx-auto lg:mx-0">
-                  Record your screen in HD, auto-upload to Google Drive, and share with a link.
-                  No installs. No sign-up walls. Just click & record.
+                <p className="max-w-[580px] text-lg sm:text-xl text-[hsl(var(--muted-foreground))] leading-relaxed mx-auto lg:mx-0">
+                  Record your screen in HD, auto-upload to Cloud, and share with a single link.
+                  Designed for speed, built for professionals.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center lg:justify-start">
-                  <Link href="/login">
-                    <Button size="lg" className="w-full sm:w-auto rounded-full text-base h-12 px-8 shadow-lg shadow-[hsl(var(--primary)/0.3)] hover:shadow-xl hover:shadow-[hsl(var(--primary)/0.4)] transition-all group">
-                      Start Recording
-                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
+                  <Link href="/login" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full rounded-full text-base h-14 px-8 shadow-xl shadow-[hsl(var(--primary)/0.25)] hover:shadow-2xl hover:shadow-[hsl(var(--primary)/0.35)] transition-all hover:-translate-y-1">
+                      Start Recording Free
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="#how-it-works">
-                    <Button variant="outline" size="lg" className="w-full sm:w-auto rounded-full text-base h-12 px-8">
-                      <Play className="mr-2 h-4 w-4" />
-                      See How It Works
+                  <Link href="#demo" className="w-full sm:w-auto">
+                    <Button variant="outline" size="lg" className="w-full rounded-full text-base h-14 px-8 border-[hsl(var(--border))] hover:bg-[hsl(var(--accent))]">
+                      <Play className="mr-2 h-4 w-4 fill-current" />
+                      Watch Demo
                     </Button>
                   </Link>
                 </div>
 
-                <div className="flex items-center gap-6 text-sm text-[hsl(var(--muted-foreground))] pt-2 justify-center lg:justify-start">
-                  <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-500" />HD Quality</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-500" />No Watermark</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-emerald-500" />Unlimited</span>
-                </div>
-              </div>
-
-              {/* Right Content - Demo Card */}
-              <div className="relative mx-auto w-full max-w-[520px] lg:max-w-none animate-float" style={{ animationDelay: '300ms' }}>
-                <div className="relative rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card)/0.8)] backdrop-blur-xl shadow-2xl overflow-hidden">
-                  {/* Browser chrome */}
-                  <div className="flex items-center gap-2 px-4 py-3 bg-[hsl(var(--muted)/0.5)] border-b border-[hsl(var(--border)/0.5)]">
-                    <div className="flex gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-400/80" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-400/80" />
-                      <div className="w-3 h-3 rounded-full bg-green-400/80" />
+                <div className="flex items-center gap-6 text-sm font-medium text-[hsl(var(--muted-foreground))] pt-4 justify-center lg:justify-start">
+                  <div className="flex items-center gap-2">
+                    <div className="flex -space-x-2">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className={`w-8 h-8 rounded-full border-2 border-[hsl(var(--background))] bg-gray-200`} style={{ backgroundImage: `url(https://i.pravatar.cc/100?img=${i + 10})`, backgroundSize: 'cover' }} />
+                      ))}
                     </div>
-                    <div className="flex-1 mx-4">
-                      <div className="h-6 bg-[hsl(var(--background)/0.6)] rounded-md flex items-center px-3">
-                        <span className="text-xs text-[hsl(var(--muted-foreground))]">app.recordit.dev</span>
+                    <div className="flex flex-col text-xs text-[hsl(var(--foreground))]">
+                      <span>10k+ Users</span>
+                      <div className="flex text-yellow-500">
+                        {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-3 h-3 fill-current" />)}
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Video area */}
-                  <div className="aspect-video bg-gradient-to-br from-violet-600/10 via-[hsl(var(--background))] to-sky-600/10 relative flex items-center justify-center group cursor-pointer">
-                    {/* Grid pattern */}
-                    <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.3 }} />
+              {/* Right Content - Modern Video Player UI */}
+              <div className="relative mx-auto w-full max-w-[600px] lg:max-w-none animate-float" style={{ animationDelay: '300ms' }}>
+                <div className="relative rounded-2xl border border-[hsl(var(--border)/0.5)] bg-[hsl(var(--card))] shadow-2xl overflow-hidden ring-1 ring-[hsl(var(--border))]">
+                  {/* Browser Chrome */}
+                  <div className="flex items-center gap-4 px-5 py-3.5 bg-[hsl(var(--muted)/0.4)] border-b border-[hsl(var(--border)/0.5)] backdrop-blur-md">
+                    <div className="flex gap-2">
+                      <div className="w-3 h-3 rounded-full bg-[#FF5F57] border border-[#E0443E]" />
+                      <div className="w-3 h-3 rounded-full bg-[#FEBC2E] border border-[#D89E24]" />
+                      <div className="w-3 h-3 rounded-full bg-[#28C840] border border-[#1AAB29]" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                      <div className="h-7 w-full max-w-sm bg-[hsl(var(--background)/0.5)] rounded-lg flex items-center justify-center border border-[hsl(var(--border)/0.5)]">
+                        <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
+                          <Shield className="w-3 h-3" />
+                          <span>recordit.dev/demo/v/8s9d7f</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="w-20 h-2 rounded-full bg-[hsl(var(--border))]" />
+                    </div>
+                  </div>
 
-                    {/* Play button */}
-                    <div className="relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-2xl shadow-violet-500/30 transition-all group-hover:scale-110 group-hover:shadow-violet-500/40">
-                      <Play className="h-7 w-7 sm:h-8 sm:w-8 text-white ml-1 fill-white" />
+                  {/* Video Content Placeholder */}
+                  <div className="aspect-[16/10] bg-gradient-to-br from-violet-900/5 via-[hsl(var(--background))] to-indigo-900/5 relative flex items-center justify-center group cursor-pointer overflow-hidden">
+                    {/* Abstract UI Background */}
+                    <div className="absolute inset-0 p-8 grid grid-cols-12 gap-4 opacity-40 mix-blend-multiply dark:mix-blend-screen">
+                      <div className="col-span-3 bg-[hsl(var(--primary)/0.1)] rounded-xl h-full" />
+                      <div className="col-span-9 flex flex-col gap-4">
+                        <div className="h-16 bg-[hsl(var(--primary)/0.1)] rounded-xl w-full" />
+                        <div className="flex-1 bg-[hsl(var(--primary)/0.05)] rounded-xl w-full grid grid-cols-2 gap-4 p-4">
+                          <div className="bg-[hsl(var(--background))] rounded-lg shadow-sm" />
+                          <div className="bg-[hsl(var(--background))] rounded-lg shadow-sm" />
+                          <div className="bg-[hsl(var(--background))] rounded-lg shadow-sm" />
+                          <div className="bg-[hsl(var(--background))] rounded-lg shadow-sm" />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Recording indicator */}
-                    <div className="absolute top-4 left-4 flex items-center gap-2 bg-[hsl(var(--background)/0.8)] backdrop-blur px-3 py-1.5 rounded-full border border-[hsl(var(--border)/0.5)]">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      <span className="text-xs font-mono font-medium text-[hsl(var(--foreground))]">02:34</span>
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-black/10 transition-colors flex items-center justify-center z-10">
+                      <div className="w-20 h-20 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center shadow-lg shadow-[hsl(var(--primary)/0.4)] group-hover:scale-110 transition-all duration-300">
+                        <Play className="w-8 h-8 text-white fill-current ml-1" />
+                      </div>
                     </div>
 
-                    {/* Webcam bubble */}
-                    <div className="absolute bottom-4 right-4 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 border-4 border-[hsl(var(--background))] shadow-xl flex items-center justify-center text-white font-bold text-lg">
-                      RA
+                    {/* Active Recording State UI */}
+                    <div className="absolute top-6 left-6 flex items-center gap-3 bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 z-20 shadow-lg">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
+                      <span className="text-sm font-mono font-medium text-white">00:42</span>
+                    </div>
+
+                    {/* Webcam Bubble */}
+                    <div className="absolute bottom-6 right-6 w-24 h-24 rounded-full border-4 border-white shadow-2xl z-20 overflow-hidden bg-gray-900">
+                      <img src="https://i.pravatar.cc/150?img=12" alt="Webcam" className="w-full h-full object-cover" />
+                    </div>
+
+                    {/* Cursor Graphic */}
+                    <div className="absolute top-1/3 right-1/4 animate-float" style={{ animationDuration: '4s' }}>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-xl text-[hsl(var(--foreground))]">
+                        <path d="M5.5 3.5L11.5 19.5L14.5 12.5L21.5 9.5L5.5 3.5Z" fill="white" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                      </svg>
                     </div>
                   </div>
                 </div>
 
-                {/* Floating card */}
-                <div className="absolute -bottom-4 -left-4 bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-xl p-3 animate-fade-in-up hidden sm:flex items-center gap-3" style={{ animationDelay: '800ms' }}>
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-emerald-500" />
+                {/* Floating Success Toast */}
+                <div className="absolute -bottom-6 -left-6 bg-[hsl(var(--card))] rounded-xl border border-[hsl(var(--border))] shadow-2xl p-4 animate-fade-in-up hidden md:flex items-center gap-4 z-20 hover:scale-105 transition-transform cursor-default" style={{ animationDelay: '800ms' }}>
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                    <CheckCircle className="w-6 h-6 text-emerald-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Uploaded!</p>
-                    <p className="text-xs text-[hsl(var(--muted-foreground))]">Saved to Google Drive</p>
+                    <p className="text-sm font-bold text-[hsl(var(--foreground))]">Link Copied!</p>
+                    <p className="text-xs text-[hsl(var(--muted-foreground))]">Ready to share instantly</p>
                   </div>
                 </div>
               </div>
@@ -228,54 +270,61 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ──────────── Trusted By ──────────── */}
-        <section className="border-y border-[hsl(var(--border)/0.4)] bg-[hsl(var(--muted)/0.3)] py-8 sm:py-10">
+        {/* ──────────── Updated Trusted By (SVG Logos) ──────────── */}
+        <section className="border-y border-[hsl(var(--border)/0.5)] bg-[hsl(var(--muted)/0.3)] py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p className="mb-6 text-xs sm:text-sm font-medium text-[hsl(var(--muted-foreground))] uppercase tracking-[0.15em]">
-              Trusted by creators & teams worldwide
+            <p className="mb-8 text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-[0.2em]">
+              Trusted by fast-moving teams
             </p>
-            <div className="flex flex-wrap justify-center gap-x-8 sm:gap-x-12 gap-y-3 opacity-30">
-              {['Google', 'Microsoft', 'Spotify', 'Notion', 'Stripe', 'Vercel'].map((logo) => (
-                <span key={logo} className="font-bold text-sm sm:text-base text-[hsl(var(--foreground))]">
-                  {logo}
-                </span>
-              ))}
+            <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+              {/* Google */}
+              <svg className="h-7 sm:h-8 w-auto text-[hsl(var(--foreground))]" viewBox="0 0 100 32" fill="currentColor"><path d="M16.3 14v4.4h6.3c-.3 1.9-2.2 5.6-6.3 5.6-3.8 0-6.9-3.1-6.9-6.9s3.1-6.9 6.9-6.9c2.2 0 3.6.9 4.5 1.7l3.5-3.5C22 6.3 19.4 5 16.3 5 10.2 5 5.3 9.9 5.3 16s4.9 11 11 11c6.4 0 10.6-4.5 10.6-10.8 0-.7-.1-1.3-.2-1.8h-10.4zm16.9-4.2c-4.6 0-8.2 3.6-8.2 8.2s3.6 8.2 8.2 8.2 8.2-3.6 8.2-8.2-3.7-8.2-8.2-8.2zm0 13.5c-2.5 0-4.7-2.1-4.7-5.3s2.1-5.3 4.7-5.3 4.7 2.1 4.7 5.3-2.1 5.3-4.7 5.3zm16.8-13.5c-4.6 0-8.2 3.6-8.2 8.2s3.6 8.2 8.2 8.2 8.2-3.6 8.2-8.2-3.7-8.2-8.2-8.2zm0 13.5c-2.5 0-4.7-2.1-4.7-5.3s2.1-5.3 4.7-5.3 4.7 2.1 4.7 5.3-2.2 5.3-4.7 5.3zm15.7-9.5v-3.7h-3.6v13H69v-13h-3.2zm-6.6 9.5c0 1.8 1.4 3.2 3.2 3.2s3.2-1.4 3.2-3.2V5.3h-6.4v14zM86.7 9.8c-4.3 0-7.8 3.5-7.8 8.0 0 4.6 3.6 8.0 8.0 8.0 4.1 0 7.3-3.0 7.3-7.7V5.3h-3.5v12.5c0 2.2-1.7 4.0-3.8 4.0 -2.3 0-4.2-1.9-4.2-4.2 0-2.3 1.9-4.2 4.2-4.2 1.3 0 2.4.6 3.1 1.6l2.6-2.6c-1.4-1.6-3.4-2.6-5.9-2.6z" /></svg>
+              {/* Microsoft */}
+              <svg className="h-7 sm:h-8 w-auto text-[hsl(var(--foreground))]" viewBox="0 0 130 30" fill="currentColor"><path d="M6.2 6.2h12.5v12.5H6.2V6.2zm18.8 0h12.5v12.5H25V6.2zM6.2 25h12.5v12.5H6.2V25zm18.8 0h12.5v12.5H25V25zm25-18.8h5v18.8h-5V6.2zm10 0h5v18.8h-5V6.2zm8.8 0h5.3l3.3 12.3 3.3-12.3h5.3v18.8h-4.3V12l-3.3 13h-2.1l-3.3-13v14.2H68.8V6.2zm23.8 0h11.3v3.8H96.3v3.8h5.3v3.8h-5.3v3.8h6.3v3.8H92.6V6.2zm17.5 0h11.3v3.8H113.8v3.8h5.3v3.8h-5.3v3.8h6.3v3.8h-10v-19z" /></svg>
+              {/* Spotify */}
+              <svg className="h-7 sm:h-8 w-auto text-[hsl(var(--foreground))]" viewBox="0 0 100 30" fill="currentColor"><path d="M15 0C6.7 0 0 6.7 0 15s6.7 15 15 15 15-6.7 15-15S23.3 0 15 0zm6.9 21.6c-.3.4-.9.6-1.4.3-3.7-2.3-8.4-2.8-13.9-1.5-.6.1-1.1-.3-1.2-.8-.1-.6.3-1.1.8-1.2 6.1-1.4 11.3-.8 15.4 1.7.4.2.6.8.3 1.5zm1.9-4.8c-.4.6-1.1.8-1.7.4-4.2-2.6-10.7-3.3-15.7-1.8-.7.2-1.4-.2-1.6-.8-.2-.7.2-1.4.8-1.6 5.8-1.7 13-1 17.8 2 .6.4.8 1.1.4 1.8zm.1-5c-5.1-3-13.4-3.3-18.3-1.8-.8.2-1.6-.2-1.8-1-.2-.8.2-1.6 1-1.8 5.6-1.7 14.8-1.3 20.7 2.2.7.4 1 1.3.6 2s-1.3 1-2 .4zM55.5 10.4h3.6v12.5h-3.6V10.4zm7.2 0h3.6v12.5h-3.6V10.4zm10.8 0h3.6v12.5h-3.6V10.4zm8.4 0h3.6v12.5h-3.6V10.4z" /></svg>
+              {/* Vercel */}
+              <svg className="h-6 sm:h-7 w-auto text-[hsl(var(--foreground))]" viewBox="0 0 110 26" fill="currentColor"><path d="M13 1L25 22H1L13 1ZM45 8h4.2l-3.3 9h-3.8L45 8zm14.6 9h-5.8v-9h5.8v1.3h-4.2v2.5h3.8v1.3h-3.8v2.6h4.2V17zm4.2-9h3.6c2 0 3.2 1.2 3.2 3.1 0 1.6-.9 2.7-2.3 2.9l2.5 3h-2l-2.3-2.8h-1.1v2.8h-1.6V8zm3 4.8c1.2 0 1.9-.6 1.9-1.8 0-1.1-.7-1.7-1.9-1.7h-1.4v3.5h1.4zm9.4 4.4c-2.4 0-4.2-1.8-4.2-4.3s1.7-4.4 4.2-4.4c2.2 0 3.8 1.4 4 3.5h-1.5c-.2-1.3-1.2-2.2-2.5-2.2-1.6 0-2.6 1.2-2.6 3s1 3 2.6 3c1.3 0 2.3-.9 2.5-2.2h1.5c-.2 2.1-1.8 3.5-4 3.5zm7.8-8.7h5.8v1.3h-4.2v2.5h3.8v1.3h-3.8v2.6h4.2V17h-5.8V8zm8.6 0h1.6v7.7h4.8V17h-6.4V8z" /></svg>
             </div>
           </div>
         </section>
 
         {/* ──────────── How It Works ──────────── */}
-        <section id="how-it-works" className="py-20 sm:py-28">
+        <section id="how-it-works" className="py-24 sm:py-32">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <p className="text-sm font-semibold uppercase tracking-widest text-[hsl(var(--primary))] mb-3">
-                How It Works
+            <div className="text-center mb-16 lg:mb-20">
+              <p className="text-sm font-bold uppercase tracking-widest text-[hsl(var(--primary))] mb-3">
+                Workflow
               </p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-4">
-                Three Steps. That&apos;s It.
+              <h2 className="text-4xl sm:text-5xl font-bold text-[hsl(var(--foreground))] mb-6">
+                From Screen to Share in Seconds
               </h2>
-              <p className="text-base sm:text-lg text-[hsl(var(--muted-foreground))] max-w-xl mx-auto">
-                No complicated setup, no installations — just pure simplicity.
+              <p className="text-xl text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
+                No complicated setup, no installations — we removed the friction so you can focus on the content.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-              {[
-                { step: '01', title: 'Click Record', desc: 'Choose your screen, window, or tab. Toggle mic & webcam on/off.', color: 'from-violet-600 to-purple-600' },
-                { step: '02', title: 'Record & Finish', desc: 'Record as long as you want. Pause, resume, stop anytime.', color: 'from-sky-600 to-blue-600' },
-                { step: '03', title: 'Share Instantly', desc: 'Auto-uploaded to Drive. Get a shareable link in seconds.', color: 'from-emerald-600 to-teal-600' },
-              ].map((item, i) => (
-                <div key={i} className="relative text-center group animate-fade-in-up" style={{ animationDelay: `${i * 150}ms` }}>
-                  <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white font-bold text-xl shadow-xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    {item.step}
-                  </div>
-                  <h3 className="text-xl font-bold text-[hsl(var(--foreground))] mb-2">{item.title}</h3>
-                  <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">{item.desc}</p>
+            <div className="grid md:grid-cols-3 gap-12 relative">
+              {/* Connecting Line (Desktop) */}
+              <div className="hidden md:block absolute top-[20%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[hsl(var(--border))] to-transparent z-0" style={{ backgroundImage: 'linear-gradient(to right, transparent 50%, hsl(var(--border)) 50%)', backgroundSize: '20px 100%' }} />
 
-                  {/* Connector line */}
-                  {i < 2 && (
-                    <div className="hidden md:block absolute top-8 left-[calc(50%+48px)] w-[calc(100%-96px)] h-px bg-gradient-to-r from-[hsl(var(--border))] to-[hsl(var(--border))]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, hsl(var(--border)), hsl(var(--border)) 6px, transparent 6px, transparent 12px)' }} />
-                  )}
+              {[
+                { step: '01', title: 'Click Record', desc: 'Choose your screen, window, or tab. Toggle mic & webcam on/off.', color: 'from-violet-600 to-purple-600', icon: Zap },
+                { step: '02', title: 'Capture Content', desc: 'Narrate your thoughts. Use our drawing tools to highlight key areas.', color: 'from-sky-600 to-blue-600', icon: MonitorPlay },
+                { step: '03', title: 'Share Instantly', desc: 'Your video is auto-uploaded. Paste the link anywhere to share.', color: 'from-emerald-600 to-teal-600', icon: Share2 },
+              ].map((item, i) => (
+                <div key={i} className="relative text-center group z-10">
+                  <div className="bg-[hsl(var(--background))] inline-block p-4 rounded-full mb-6 relative">
+                    <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-xl group-hover:scale-110 transition-transform duration-300 relative overflow-hidden`}>
+                      <item.icon className="w-8 h-8 relative z-10" />
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-8 h-8 bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-full flex items-center justify-center font-bold text-sm shadow-sm">
+                      {i + 1}
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-3">{item.title}</h3>
+                  <p className="text-[hsl(var(--muted-foreground))] leading-relaxed text-lg">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -283,33 +332,33 @@ export default function LandingPage() {
         </section>
 
         {/* ──────────── Features ──────────── */}
-        <section id="features" className="py-20 sm:py-28 bg-[hsl(var(--muted)/0.3)]">
+        <section id="features" className="py-24 sm:py-32 bg-[hsl(var(--muted)/0.3)] border-t border-[hsl(var(--border)/0.5)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <p className="text-sm font-semibold uppercase tracking-widest text-[hsl(var(--primary))] mb-3">
+            <div className="text-center mb-16 lg:mb-20">
+              <p className="text-sm font-bold uppercase tracking-widest text-[hsl(var(--primary))] mb-3">
                 Features
               </p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[hsl(var(--foreground))] mb-4">
-                Everything You Need
+              <h2 className="text-4xl sm:text-5xl font-bold text-[hsl(var(--foreground))] mb-6">
+                Built for Modern Teams
               </h2>
-              <p className="text-base sm:text-lg text-[hsl(var(--muted-foreground))] max-w-xl mx-auto">
-                Powerful features packed into a clean, easy-to-use interface.
+              <p className="text-xl text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
+                Everything you need to communicate clearly, without the email back-and-forth.
               </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {features.map((feature, i) => (
                 <div
                   key={i}
-                  className="group relative bg-[hsl(var(--card))] p-7 rounded-2xl border border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)] transition-all duration-300 hover-lift"
+                  className="group relative bg-[hsl(var(--card))] p-8 rounded-3xl border border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/0.3)] transition-all duration-300 hover:shadow-2xl hover:shadow-[hsl(var(--primary)/0.05)] hover:-translate-y-1"
                 >
-                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-300`} />
+                  <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300`} />
                   <div className="relative z-10">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <feature.icon className="w-6 h-6" />
+                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <feature.icon className="w-7 h-7" />
                     </div>
-                    <h3 className="text-lg font-bold text-[hsl(var(--foreground))] mb-2">{feature.title}</h3>
-                    <p className="text-[hsl(var(--muted-foreground))] leading-relaxed text-sm">{feature.desc}</p>
+                    <h3 className="text-xl font-bold text-[hsl(var(--foreground))] mb-3">{feature.title}</h3>
+                    <p className="text-[hsl(var(--muted-foreground))] leading-relaxed text-base">{feature.desc}</p>
                   </div>
                 </div>
               ))}
@@ -318,28 +367,36 @@ export default function LandingPage() {
         </section>
 
         {/* ──────────── CTA Section ──────────── */}
-        <section className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 px-6 sm:px-12 py-16 sm:py-20 text-center shadow-2xl">
-              <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1), transparent 50%), radial-gradient(circle at 80% 50%, rgba(255,255,255,0.05), transparent 50%)' }} />
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        <section className="py-24 sm:py-32 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-violet-600 via-indigo-600 to-purple-700 px-6 sm:px-16 py-20 sm:py-24 text-center shadow-2xl isolate">
+              {/* Background Shapes */}
+              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+              <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl" />
+              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
 
               <div className="relative z-10">
-                <h2 className="mb-4 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white">
-                  Ready to Start Recording?
+                <h2 className="mb-6 text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                  Stop Typing. <br className="sm:hidden" /> Start Recording.
                 </h2>
-                <p className="mb-8 text-base sm:text-lg text-white/70 max-w-lg mx-auto">
-                  Join thousands of creators and teams who use RecordIt every day.
+                <p className="mb-10 text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+                  Join 2 million+ people who use RecordIt to save time and communicate with clarity.
                 </p>
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full px-8 h-12 text-base shadow-xl hover:shadow-2xl transition-all hover:scale-105 bg-white text-indigo-700 hover:bg-white/95 font-semibold border-0">
-                    Get Started — It&apos;s Free
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-                <p className="mt-4 text-sm text-white/50">
-                  No credit card · No installs · Free forever
-                </p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Link href="/login" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full h-14 rounded-full px-8 text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 bg-white text-indigo-700 hover:bg-white/95 font-bold border-0">
+                      Get It Free
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm text-white/60 font-medium">
+                  <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4" /> No Credit Card</span>
+                  <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Mac & PC</span>
+                  <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Instant Sharing</span>
+                </div>
               </div>
             </div>
           </div>
@@ -347,31 +404,40 @@ export default function LandingPage() {
       </main>
 
       {/* ──────────── Footer ──────────── */}
-      <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-                  <Video className="w-4 h-4 text-white" />
+      <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.2)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                  <Video className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-lg font-bold text-[hsl(var(--foreground))]">RecordIt</span>
+                <span className="text-2xl font-bold text-[hsl(var(--foreground))]">RecordIt</span>
               </div>
-              <p className="text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
-                Professional screen recording, simplified.
+              <p className="text-[hsl(var(--muted-foreground))] leading-relaxed max-w-xs mb-6">
+                The fastest way to share screen recordings. Built for developers, designers, and fast-moving teams.
               </p>
+              <div className="flex gap-4">
+                {['twitter', 'github', 'discord', 'linkedin'].map((social) => (
+                  <a key={social} href="#" className="w-8 h-8 rounded-full bg-[hsl(var(--muted))] flex items-center justify-center text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--primary))] hover:text-white transition-all">
+                    <span className="sr-only">{social}</span>
+                    <Globe className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
             </div>
+
             {[
-              { title: 'Product', links: ['Features', 'Pricing', 'Dashboard'] },
-              { title: 'Company', links: ['About', 'Blog', 'Contact'] },
-              { title: 'Legal', links: ['Privacy', 'Terms', 'Security'] },
+              { title: 'Product', links: ['Features', 'Pricing', 'Download', 'Changelog'] },
+              { title: 'Company', links: ['About', 'Careers', 'Blog', 'Contact'] },
+              { title: 'Resources', links: ['Help Center', 'API Docs', 'Community', 'Status'] },
             ].map((col) => (
               <div key={col.title}>
-                <h4 className="font-semibold text-sm text-[hsl(var(--foreground))] mb-3 uppercase tracking-wider">{col.title}</h4>
-                <ul className="space-y-2">
+                <h4 className="font-bold text-[hsl(var(--foreground))] mb-6">{col.title}</h4>
+                <ul className="space-y-4">
                   {col.links.map((link) => (
                     <li key={link}>
-                      <Link href={link === 'Pricing' ? '/pricing' : link === 'Dashboard' ? '/dashboard' : '#'} className="text-sm text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors">
+                      <Link href={link === 'Pricing' ? '/pricing' : '#'} className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--primary))] transition-colors">
                         {link}
                       </Link>
                     </li>
@@ -380,12 +446,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="border-t border-[hsl(var(--border))] pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 RecordIt. All rights reserved.</p>
-            <div className="flex gap-6">
-              {['Twitter', 'GitHub', 'Discord'].map((s) => (
-                <a key={s} href="#" className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors">{s}</a>
-              ))}
+
+          <div className="border-t border-[hsl(var(--border))] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 RecordIt Inc. All rights reserved.</p>
+            <div className="flex gap-8 text-sm text-[hsl(var(--muted-foreground))]">
+              <a href="#" className="hover:text-[hsl(var(--foreground))]">Privacy Policy</a>
+              <a href="#" className="hover:text-[hsl(var(--foreground))]">Terms of Service</a>
+              <a href="#" className="hover:text-[hsl(var(--foreground))]">Cookies</a>
             </div>
           </div>
         </div>

@@ -1,14 +1,21 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Video, Mic, MicOff, VideoIcon, VideoOff, Circle, ArrowLeft, Pause, Play, Square, Home, RotateCcw, Copy, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
+import { useAuth } from '@/contexts/AuthContext';
+import { saveRecording } from '@/lib/firebase/firestore';
+import { uploadToDrive } from '@/lib/utils/drive';
+import { WebcamOverlay } from '@/components/recording/WebcamOverlay';
 
 type Phase = 'setup' | 'countdown' | 'recording' | 'processing' | 'complete' | 'error';
 
 export default function RecordPage() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [phase, setPhase] = useState<Phase>('setup');
     const [includeMic, setIncludeMic] = useState(true);
     const [includeCam, setIncludeCam] = useState(false);
@@ -16,13 +23,23 @@ export default function RecordPage() {
     const [duration, setDuration] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [processingStatus, setProcessingStatus] = useState('');
     const [copied, setCopied] = useState(false);
+    const [shareLink, setShareLink] = useState('');
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Recording refs
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
+    const screenStreamRef = useRef<MediaStream | null>(null);
+    const camStreamRef = useRef<MediaStream | null>(null);
+    const [camStream, setCamStream] = useState<MediaStream | null>(null);
 
     // Countdown timer
     useEffect(() => {
         if (phase !== 'countdown') return;
         if (countdown <= 0) {
-            setPhase('recording');
+            startActualRecording();
             return;
         }
         const t = setTimeout(() => setCountdown(c => c - 1), 1000);
@@ -36,29 +53,132 @@ export default function RecordPage() {
         return () => clearInterval(t);
     }, [phase, isPaused]);
 
-    // Processing simulation
-    useEffect(() => {
-        if (phase !== 'processing') return;
-        if (progress >= 100) {
-            setPhase('complete');
-            return;
-        }
-        const t = setTimeout(() => setProgress(p => Math.min(p + Math.random() * 15 + 5, 100)), 300);
-        return () => clearTimeout(t);
-    }, [phase, progress]);
+    const handleStartSetup = async () => {
+        try {
+            setErrorMsg(null);
 
-    const handleStart = () => {
-        setPhase('countdown');
-        setCountdown(3);
-        setDuration(0);
+            // 1. Get Screen Stream
+            const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+                audio: includeMic
+            });
+            screenStreamRef.current = screenStream;
+
+            // 2. Get Camera Stream if needed
+            if (includeCam) {
+                const camStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false // We use audio from screen/mic capture
+                });
+                camStreamRef.current = camStream;
+                setCamStream(camStream);
+            }
+
+            // If user stops sharing from browser UI
+            screenStream.getVideoTracks()[0].onended = () => {
+                handleStop();
+            };
+
+            setPhase('countdown');
+            setCountdown(3);
+            setDuration(0);
+        } catch (err: any) {
+            console.error('Permission error:', err);
+            setErrorMsg(err.message || 'Permissions denied or cancelled');
+            setPhase('setup');
+        }
+    };
+
+    const startActualRecording = () => {
+        if (!screenStreamRef.current) return;
+
+        const streamsToCombine = [screenStreamRef.current];
+
+        // Combine audio tracks if available
+        const audioTracks = screenStreamRef.current.getAudioTracks();
+
+        const combinedStream = new MediaStream([
+            ...screenStreamRef.current.getVideoTracks(),
+            ...audioTracks
+        ]);
+
+        const recorder = new MediaRecorder(combinedStream, {
+            mimeType: 'video/webm;codecs=vp8,opus'
+        });
+
+        recorder.ondataavailable = (e) => {
+            if (e.data.size > 0) {
+                chunksRef.current.push(e.data);
+            }
+        };
+
+        recorder.onstop = processRecording;
+
+        mediaRecorderRef.current = recorder;
+        recorder.start(1000); // Collect in chunks
+        setPhase('recording');
     };
 
     const handleStop = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+
+        // Stop all tracks
+        [screenStreamRef.current, camStreamRef.current].forEach(stream => {
+            stream?.getTracks().forEach(track => track.stop());
+        });
+
         setPhase('processing');
         setProgress(0);
     };
 
+    const processRecording = async () => {
+        try {
+            const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+            setProcessingStatus('Preparing upload...');
+            setProgress(5);
+
+            const token = localStorage.getItem('google_access_token');
+            if (!token) throw new Error('Google access token missing. Please log in again.');
+
+            // Upload to Google Drive with progress updates
+            const fileName = `RecordIt-${new Date().toLocaleString()}.webm`;
+            setProcessingStatus('Uploading to Google Drive...');
+
+            const driveData = await uploadToDrive(blob, fileName, token, duration, (p) => {
+                // Map upload progress to 5-90% range to leave room for final save
+                const mappedProgress = 5 + (p.percentage * 0.95);
+                setProgress(mappedProgress);
+            });
+
+            setProcessingStatus('Complete!');
+            setProgress(100);
+            setShareLink(driveData.link);
+
+            // Save metadata to Firestore (Non-blocking)
+            if (user) {
+                saveRecording(
+                    user.uid,
+                    fileName,
+                    driveData.link,
+                    driveData.id,
+                    duration
+                ).catch(err => console.error('Firestore save error:', err));
+            }
+
+            setPhase('complete');
+        } catch (err: any) {
+            console.error('Processing error:', err);
+            setErrorMsg(err.message || 'Failed to save recording');
+            setPhase('error');
+        } finally {
+            chunksRef.current = [];
+        }
+    };
+
     const handleCopy = () => {
+        navigator.clipboard.writeText(shareLink);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -133,7 +253,7 @@ export default function RecordPage() {
                         </div>
 
                         <Button
-                            onClick={handleStart}
+                            onClick={handleStartSetup}
                             size="lg"
                             className="w-full rounded-xl h-13 text-lg shadow-lg shadow-[hsl(var(--primary)/0.3)] hover:shadow-xl transition-all group"
                         >
@@ -144,6 +264,13 @@ export default function RecordPage() {
                         <p className="text-xs text-center text-[hsl(var(--muted-foreground))] mt-4">
                             You&apos;ll choose which screen to share after clicking Start
                         </p>
+
+                        {errorMsg && (
+                            <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" />
+                                {errorMsg}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
@@ -156,33 +283,25 @@ export default function RecordPage() {
                             <span className="text-6xl font-bold text-white">{countdown || '🎬'}</span>
                         </div>
                     </div>
+                    {includeCam && camStream && <WebcamOverlay stream={camStream} />}
                 </div>
             )}
 
             {/* ──── Recording Phase ──── */}
             {phase === 'recording' && (
                 <div className="flex-1 flex flex-col items-center justify-center px-4 relative">
-                    {/* Simulated screen capture area */}
-                    <div className="w-full max-w-4xl aspect-video bg-[hsl(var(--muted)/0.5)] rounded-2xl border border-[hsl(var(--border))] flex items-center justify-center mb-8 relative overflow-hidden">
-                        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)', backgroundSize: '24px 24px', opacity: 0.5 }} />
-                        <p className="text-[hsl(var(--muted-foreground))] text-lg font-medium z-10">Screen capture area</p>
-
-                        {/* Recording indicator */}
-                        <div className="absolute top-4 left-4 flex items-center gap-2 bg-[hsl(var(--card)/0.9)] backdrop-blur px-3 py-2 rounded-full border border-[hsl(var(--border))] z-10">
-                            <div className="relative">
-                                <div className="w-3 h-3 rounded-full bg-red-500" />
-                                {!isPaused && <div className="absolute inset-0 w-3 h-3 rounded-full bg-red-500 animate-ping" />}
-                            </div>
-                            <span className="font-mono font-semibold text-sm tabular-nums">{formatTime(duration)}</span>
+                    {/* Visual indicator (Loom typically doesn't show a preview of screen, just the webcam) */}
+                    <div className="text-center mb-12 animate-fade-in">
+                        <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4 border-2 border-red-500/20 relative">
+                            <div className="w-4 h-4 rounded-full bg-red-500 animate-ping absolute" />
+                            <div className="w-4 h-4 rounded-full bg-red-500 relative" />
                         </div>
-
-                        {/* Webcam bubble */}
-                        {includeCam && (
-                            <div className="absolute bottom-4 right-4 w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 border-4 border-[hsl(var(--background))] shadow-xl flex items-center justify-center text-white font-bold text-xl z-10">
-                                RA
-                            </div>
-                        )}
+                        <h2 className="text-2xl font-bold text-[hsl(var(--foreground))]">Recording in Progress</h2>
+                        <p className="text-[hsl(var(--muted-foreground))]">Your screen is being captured</p>
                     </div>
+
+                    {/* Webcam Overlay */}
+                    {includeCam && camStream && <WebcamOverlay stream={camStream} />}
 
                     {/* Controls */}
                     <div className="flex items-center gap-4 bg-[hsl(var(--card))] rounded-full px-6 py-3 border border-[hsl(var(--border))] shadow-xl animate-slide-in-left">
@@ -195,7 +314,11 @@ export default function RecordPage() {
                         </div>
                         <div className="h-6 w-px bg-[hsl(var(--border))]" />
                         <button
-                            onClick={() => setIsPaused(!isPaused)}
+                            onClick={() => {
+                                if (isPaused) mediaRecorderRef.current?.resume();
+                                else mediaRecorderRef.current?.pause();
+                                setIsPaused(!isPaused);
+                            }}
                             className="p-2.5 hover:bg-[hsl(var(--accent))] rounded-full transition-colors"
                             title={isPaused ? 'Resume' : 'Pause'}
                         >
@@ -218,7 +341,7 @@ export default function RecordPage() {
                     <div className="text-center max-w-md animate-fade-in-up">
                         <div className="w-16 h-16 border-4 border-[hsl(var(--muted))] border-t-[hsl(var(--primary))] rounded-full animate-spin mx-auto mb-6" />
                         <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-2">Processing Recording</h2>
-                        <p className="text-[hsl(var(--muted-foreground))] mb-8">Uploading to Google Drive...</p>
+                        <p className="text-[hsl(var(--muted-foreground))] mb-8">{processingStatus || 'Saving to your Google Drive...'}</p>
                         <div className="w-full bg-[hsl(var(--muted))] rounded-full h-2.5 overflow-hidden">
                             <div
                                 className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full transition-all duration-300"
@@ -226,6 +349,27 @@ export default function RecordPage() {
                             />
                         </div>
                         <p className="text-sm text-[hsl(var(--muted-foreground))] mt-3 font-medium">{Math.round(progress)}% complete</p>
+                    </div>
+                </div>
+            )}
+
+            {/* ──── Error Phase ──── */}
+            {phase === 'error' && (
+                <div className="flex-1 flex items-center justify-center px-4">
+                    <div className="text-center max-w-md animate-fade-in-up">
+                        <div className="w-20 h-20 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-6">
+                            <AlertCircle className="w-10 h-10 text-red-500" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-2">Something went wrong</h2>
+                        <p className="text-[hsl(var(--muted-foreground))] mb-8">{errorMsg}</p>
+                        <Button
+                            variant="default"
+                            onClick={() => { setPhase('setup'); setDuration(0); setProgress(0); setErrorMsg(null); }}
+                            className="shadow-lg shadow-[hsl(var(--primary)/0.2)]"
+                        >
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Try Again
+                        </Button>
                     </div>
                 </div>
             )}
@@ -244,7 +388,7 @@ export default function RecordPage() {
                             <p className="text-xs text-[hsl(var(--muted-foreground))] mb-2 font-semibold uppercase tracking-wider">Shareable Link</p>
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-[hsl(var(--primary))] break-all flex-1 font-medium">
-                                    https://drive.google.com/file/d/1a2b3c4d5e/view
+                                    {shareLink}
                                 </span>
                                 <button
                                     onClick={handleCopy}
@@ -252,6 +396,9 @@ export default function RecordPage() {
                                 >
                                     {copied ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />}
                                 </button>
+                                <a href={shareLink} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-[hsl(var(--accent))] rounded-lg transition-colors flex-shrink-0">
+                                    <ExternalLink className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+                                </a>
                             </div>
                         </div>
 

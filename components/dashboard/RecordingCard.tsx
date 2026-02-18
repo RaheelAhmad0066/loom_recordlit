@@ -20,7 +20,7 @@ export function RecordingCard({ recording, onDelete, onRename }: RecordingCardPr
     const [copied, setCopied] = useState(false);
 
     const handleCopyLink = async () => {
-        await navigator.clipboard.writeText(recording.driveLink);
+        await navigator.clipboard.writeText(recording.videoUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
         setShowMenu(false);
@@ -34,7 +34,7 @@ export function RecordingCard({ recording, onDelete, onRename }: RecordingCardPr
     };
 
     const handleDownload = () => {
-        window.open(recording.driveLink.replace('/view', '/export?format=mp4'), '_blank');
+        window.open(recording.videoUrl.replace('/view', '/export?format=mp4'), '_blank');
         setShowMenu(false);
     };
 
@@ -80,7 +80,7 @@ export function RecordingCard({ recording, onDelete, onRename }: RecordingCardPr
 
                 <div className="flex items-center justify-between mt-4">
                     <a
-                        href={recording.driveLink}
+                        href={recording.videoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-sm text-[hsl(var(--primary))] hover:text-[hsl(var(--primary)/0.8)] flex items-center gap-1.5 font-medium transition-colors"

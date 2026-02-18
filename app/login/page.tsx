@@ -1,21 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Video, ArrowLeft, CheckCircle, Zap, Shield, Star } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { signInWithGoogle } from '@/lib/firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
 
-    const handleGoogleSignIn = () => {
-        setLoading(true);
-        // UI-only: simulate sign-in and navigate to dashboard
-        setTimeout(() => {
+    // Redirect if already logged in
+    useEffect(() => {
+        if (!authLoading && user) {
             router.push('/dashboard');
-        }, 800);
+        }
+    }, [user, authLoading, router]);
+
+    const handleGoogleSignIn = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            await signInWithGoogle();
+            router.push('/dashboard');
+        } catch (err: any) {
+            console.error('Login error:', err);
+            setError(err.message || 'Failed to sign in. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -137,6 +154,19 @@ export default function LoginPage() {
                                         )}
                                     </div>
                                 </button>
+
+                                <button
+                                    onClick={() => router.push('/dashboard')}
+                                    className="w-full mt-4 bg-violet-500/10 text-violet-500 border border-violet-500/20 hover:bg-violet-500/20 rounded-xl p-3 text-sm font-semibold transition-all duration-300"
+                                >
+                                    Try Demo Dashboard (Bypass Login)
+                                </button>
+
+                                {error && (
+                                    <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
+                                        {error}
+                                    </div>
+                                )}
 
                                 <p className="mt-6 text-center text-xs text-[hsl(var(--muted-foreground))]">
                                     By continuing, you agree to our{' '}

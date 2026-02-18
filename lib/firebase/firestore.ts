@@ -39,8 +39,8 @@ export async function saveUserProfile(
 export async function saveRecording(
     userId: string,
     title: string,
-    driveLink: string,
-    driveFileId: string,
+    videoUrl: string,
+    storagePath: string,
     duration: number,
     thumbnailUrl?: string
 ): Promise<string> {
@@ -48,8 +48,8 @@ export async function saveRecording(
     await setDoc(recordingRef, {
         userId,
         title,
-        driveLink,
-        driveFileId,
+        videoUrl, // Replaced driveLink
+        storagePath, // Replaced driveFileId
         duration,
         thumbnailUrl: thumbnailUrl || null,
         createdAt: serverTimestamp(),
@@ -60,18 +60,37 @@ export async function saveRecording(
 
 // Get user's recordings
 export async function getUserRecordings(userId: string): Promise<Recording[]> {
-    const recordingsRef = collection(db, 'recordings');
-    const q = query(
-        recordingsRef,
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
+    try {
+        const recordingsRef = collection(db, 'recordings');
+        const q = query(
+            recordingsRef,
+            where('userId', '==', userId)
+        );
+        const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-    })) as Recording[];
+        const recordings = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+            };
+        }) as Recording[];
+
+        // Sort in memory by createdAt descending
+        return recordings.sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+            const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+            return dateB - dateA;
+        });
+    } catch (error: any) {
+        console.error('Error in getUserRecordings:', error);
+        // If it's an index error, suggest the link in the console
+        if (error.message?.includes('index')) {
+            console.warn('Firestore index missing! Please click the link in the Firebase error to create it.');
+        }
+        return [];
+    }
 }
 
 // Update recording

@@ -37,26 +37,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const unsubscribe = onAuthStateChanged(async (firebaseUser: FirebaseUser | null) => {
-            if (firebaseUser) {
-                const userData: User = {
-                    uid: firebaseUser.uid,
-                    email: firebaseUser.email,
-                    displayName: firebaseUser.displayName,
-                    photoURL: firebaseUser.photoURL,
-                };
-                setUser(userData);
+            try {
+                if (firebaseUser) {
+                    const userData: User = {
+                        uid: firebaseUser.uid,
+                        email: firebaseUser.email,
+                        displayName: firebaseUser.displayName,
+                        photoURL: firebaseUser.photoURL,
+                    };
+                    setUser(userData);
 
-                // Save user profile to Firestore
-                await saveUserProfile(
-                    firebaseUser.uid,
-                    firebaseUser.email,
-                    firebaseUser.displayName,
-                    firebaseUser.photoURL
-                );
-            } else {
-                setUser(null);
+                    // Save user profile to Firestore (don't block the UI loading)
+                    saveUserProfile(
+                        firebaseUser.uid,
+                        firebaseUser.email,
+                        firebaseUser.displayName,
+                        firebaseUser.photoURL
+                    ).catch(err => console.error('Error saving user profile:', err));
+                } else {
+                    setUser(null);
+                }
+            } catch (error) {
+                console.error('Auth state change error:', error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();

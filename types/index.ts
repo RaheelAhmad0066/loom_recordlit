@@ -13,8 +13,8 @@ export interface Recording {
   id: string;
   userId: string;
   title: string;
-  driveLink: string;
-  driveFileId: string;
+  videoUrl: string; // Google Drive Web View Link
+  storagePath: string; // Google Drive File ID
   duration: number; // in seconds
   thumbnailUrl?: string;
   createdAt: Timestamp;

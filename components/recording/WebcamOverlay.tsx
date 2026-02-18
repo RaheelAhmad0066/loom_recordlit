@@ -9,9 +9,14 @@ interface WebcamOverlayProps {
 
 export function WebcamOverlay({ stream }: WebcamOverlayProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const [position, setPosition] = useState({ x: window.innerWidth - 220, y: window.innerHeight - 220 });
+    const [position, setPosition] = useState({ x: 20, y: 0 }); // Default relative to bottom-right
     const [isDragging, setIsDragging] = useState(false);
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+    useEffect(() => {
+        // Center vertically on first load on client
+        setPosition({ x: window.innerWidth - 220, y: window.innerHeight - 220 });
+    }, []);
 
     useEffect(() => {
         if (videoRef.current && stream) {
@@ -67,8 +72,7 @@ export function WebcamOverlay({ stream }: WebcamOverlayProps) {
                 height: '180px',
                 transition: isDragging ? 'none' : 'ring-color 0.3s, transform 0.2s',
             }}
-            onMouseDown={handleMouseDown}
-        >
+            onMouseDown={handleMouseDown}>
             <video
                 ref={videoRef}
                 autoPlay
