@@ -14,8 +14,8 @@ export function WebcamOverlay({ stream }: WebcamOverlayProps) {
     const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
-        // Center vertically on first load on client
-        setPosition({ x: window.innerWidth - 220, y: window.innerHeight - 220 });
+        // Position in bottom-left to match recording compositor
+        setPosition({ x: 40, y: window.innerHeight - 220 });
     }, []);
 
     useEffect(() => {

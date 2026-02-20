@@ -34,7 +34,14 @@ export default function RecordPage() {
     const chunksRef = useRef<Blob[]>([]);
     const screenStreamRef = useRef<MediaStream | null>(null);
     const camStreamRef = useRef<MediaStream | null>(null);
+    const micStreamRef = useRef<MediaStream | null>(null);
     const [camStream, setCamStream] = useState<MediaStream | null>(null);
+
+    // Canvas Compositing Refs
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const screenVideoRef = useRef<HTMLVideoElement | null>(null);
+    const camVideoRef = useRef<HTMLVideoElement | null>(null);
+    const renderIntervalRef = useRef<any>(null);
 
     // Countdown timer
     useEffect(() => {
@@ -58,21 +65,48 @@ export default function RecordPage() {
         try {
             setErrorMsg(null);
 
-            // 1. Get Screen Stream
+            // 1. Get Screen Stream (System Audio if possible)
             const screenStream = await navigator.mediaDevices.getDisplayMedia({
-                video: true,
-                audio: includeMic
+                video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                },
+                audio: true
             });
             screenStreamRef.current = screenStream;
+            if (screenVideoRef.current) {
+                screenVideoRef.current.srcObject = screenStream;
+                screenVideoRef.current.play();
+            }
 
             // 2. Get Camera Stream if needed
             if (includeCam) {
                 const camStream = await navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false // We use audio from screen/mic capture
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
+                    audio: false
                 });
                 camStreamRef.current = camStream;
                 setCamStream(camStream);
+                if (camVideoRef.current) {
+                    camVideoRef.current.srcObject = camStream;
+                    camVideoRef.current.play();
+                }
+            }
+
+            // 3. Get Microphone Stream if needed
+            if (includeMic) {
+                const micStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                micStreamRef.current = micStream;
             }
 
             // If user stops sharing from browser UI
@@ -91,16 +125,87 @@ export default function RecordPage() {
     };
 
     const startActualRecording = () => {
-        if (!screenStreamRef.current) return;
+        if (!screenStreamRef.current || !canvasRef.current) return;
 
-        const streamsToCombine = [screenStreamRef.current];
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d', { alpha: false });
+        if (!ctx) return;
 
-        // Combine audio tracks if available
-        const audioTracks = screenStreamRef.current.getAudioTracks();
+        // Set canvas size to match screen video (or default to 1080p)
+        const videoTrack = screenStreamRef.current.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+        canvas.width = settings.width || 1920;
+        canvas.height = settings.height || 1080;
 
+        // Drawing Loop
+        const draw = () => {
+            try {
+                // If we're not recording or counting down, stop the drawing
+                // (Though clearInterval should handle this, it's a safe guard)
+
+                // 1. Draw Screen
+                if (screenVideoRef.current) {
+                    ctx.drawImage(screenVideoRef.current, 0, 0, canvas.width, canvas.height);
+                }
+
+                // 2. Draw Camera Overlay (Circle)
+                if (includeCam && camVideoRef.current) {
+                    const size = Math.min(canvas.width, canvas.height) * 0.2;
+                    const margin = 40;
+                    const x = margin;
+                    const y = canvas.height - size - margin;
+
+                    ctx.save();
+                    // Move to where we want the bubble and Mirror the camera
+                    ctx.translate(x + size, 0);
+                    ctx.scale(-1, 1);
+
+                    ctx.beginPath();
+                    ctx.arc(size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+                    ctx.clip();
+
+                    // Draw at 0 because of translate
+                    ctx.drawImage(camVideoRef.current, 0, y, size, size);
+                    ctx.restore();
+
+                    // Add border (non-mirrored)
+                    ctx.beginPath();
+                    ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+                    ctx.strokeStyle = '#a78bfa'; // violet-400
+                    ctx.lineWidth = 8;
+                    ctx.stroke();
+                }
+            } catch (err) {
+                console.error("Draw loop error:", err);
+            }
+        };
+
+        // Use high frequency interval instead of requestAnimationFrame for better background persistence
+        renderIntervalRef.current = setInterval(draw, 1000 / 30); // 30 FPS
+
+        // Capture Stream from Canvas
+        const canvasStream = canvas.captureStream(30);
+
+        // Mix Audio Tracks
+        const audioContext = new AudioContext();
+        const destination = audioContext.createMediaStreamDestination();
+
+        // Screen Audio (System)
+        if (screenStreamRef.current.getAudioTracks().length > 0) {
+            const screenSource = audioContext.createMediaStreamSource(new MediaStream([screenStreamRef.current.getAudioTracks()[0]]));
+            screenSource.connect(destination);
+        }
+
+        // Microphone Audio
+        if (includeMic && micStreamRef.current) {
+            const micSource = audioContext.createMediaStreamSource(micStreamRef.current);
+            micSource.connect(destination);
+        }
+
+        // Final Combined Stream
         const combinedStream = new MediaStream([
-            ...screenStreamRef.current.getVideoTracks(),
-            ...audioTracks
+            ...canvasStream.getVideoTracks(),
+            ...destination.stream.getAudioTracks()
         ]);
 
         const recorder = new MediaRecorder(combinedStream, {
@@ -113,10 +218,13 @@ export default function RecordPage() {
             }
         };
 
-        recorder.onstop = processRecording;
+        recorder.onstop = () => {
+            processRecording();
+            audioContext.close();
+        };
 
         mediaRecorderRef.current = recorder;
-        recorder.start(1000); // Collect in chunks
+        recorder.start(1000);
         setPhase('recording');
     };
 
@@ -125,10 +233,13 @@ export default function RecordPage() {
             mediaRecorderRef.current.stop();
         }
 
-        // Stop all tracks
-        [screenStreamRef.current, camStreamRef.current].forEach(stream => {
+        [screenStreamRef.current, camStreamRef.current, micStreamRef.current].forEach(stream => {
             stream?.getTracks().forEach(track => track.stop());
         });
+
+        if (renderIntervalRef.current) {
+            clearInterval(renderIntervalRef.current);
+        }
 
         setPhase('processing');
         setProgress(0);
@@ -328,9 +439,6 @@ export default function RecordPage() {
                         <p className="text-[hsl(var(--muted-foreground))]">Your screen is being captured</p>
                     </div>
 
-                    {/* Webcam Overlay */}
-                    {includeCam && camStream && <WebcamOverlay stream={camStream} />}
-
                     {/* Controls */}
                     <div className="flex items-center gap-4 bg-[hsl(var(--card))] rounded-full px-6 py-3 border border-[hsl(var(--border))] shadow-xl animate-slide-in-left">
                         <div className="flex items-center gap-2">
@@ -461,6 +569,13 @@ export default function RecordPage() {
                     </div>
                 </div>
             )}
+
+            {/* Hidden Elements for Compositing */}
+            <div className="hidden">
+                <video ref={screenVideoRef} autoPlay muted playsInline />
+                <video ref={camVideoRef} autoPlay muted playsInline />
+                <canvas ref={canvasRef} />
+            </div>
         </div>
     );
 }
