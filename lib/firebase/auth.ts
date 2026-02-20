@@ -40,3 +40,8 @@ export async function signOut(): Promise<void> {
 export function onAuthStateChanged(callback: (user: FirebaseUser | null) => void) {
     return firebaseOnAuthStateChanged(auth, callback);
 }
+
+export function getStoredAccessToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('google_access_token');
+}

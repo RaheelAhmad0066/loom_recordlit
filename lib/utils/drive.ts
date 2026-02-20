@@ -65,13 +65,20 @@ export async function uploadToDrive(
                     name: response.name,
                 });
             } else {
+                let errorMessage = `Upload failed with status ${xhr.status}`;
                 try {
                     const error = JSON.parse(xhr.responseText);
                     console.error('Drive upload error:', error);
-                    reject(new Error(error.error?.message || `Upload failed with status ${xhr.status}`));
-                } catch {
-                    reject(new Error(`Upload failed with status ${xhr.status}`));
+                    errorMessage = error.error?.message || errorMessage;
+
+                    // Specific check for unauthorized
+                    if (xhr.status === 401) {
+                        errorMessage = 'UNAUTHORIZED: Please sign in again to resume upload.';
+                    }
+                } catch (e) {
+                    console.error('Failed to parse error response', e);
                 }
+                reject(new Error(errorMessage));
             }
         };
 
@@ -82,6 +89,15 @@ export async function uploadToDrive(
 
         xhr.send(form);
     });
+}
+
+/**
+ * Gets a direct download URL for a file in Google Drive
+ * @param fileId The ID of the file
+ * @returns The direct media download URL
+ */
+export function getDirectDownloadUrl(fileId: string): string {
+    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
 }
 
 /**

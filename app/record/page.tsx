@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/contexts/AuthContext';
 import { saveRecording } from '@/lib/firebase/firestore';
 import { uploadToDrive } from '@/lib/utils/drive';
+import { signInWithGoogle } from '@/lib/firebase/auth';
 import { WebcamOverlay } from '@/components/recording/WebcamOverlay';
 
 type Phase = 'setup' | 'countdown' | 'recording' | 'processing' | 'complete' | 'error';
@@ -135,12 +136,13 @@ export default function RecordPage() {
 
     const processRecording = async () => {
         try {
+            setErrorMsg(null);
             const blob = new Blob(chunksRef.current, { type: 'video/webm' });
             setProcessingStatus('Preparing upload...');
             setProgress(5);
 
             const token = localStorage.getItem('google_access_token');
-            if (!token) throw new Error('Google access token missing. Please log in again.');
+            if (!token) throw new Error('UNAUTHORIZED: Google access token missing. Please log in again.');
 
             // Upload to Google Drive with progress updates
             const fileName = `RecordIt-${new Date().toLocaleString()}.webm`;
@@ -173,7 +175,33 @@ export default function RecordPage() {
             setErrorMsg(err.message || 'Failed to save recording');
             setPhase('error');
         } finally {
-            chunksRef.current = [];
+            // Only clear chunks if it's not a temporary auth error
+            // If it's an auth error, we keep the chunks so user can retry after login
+            const isAuthError = errorMsg?.includes('UNAUTHORIZED');
+            if (!isAuthError) {
+                chunksRef.current = [];
+            }
+        }
+    };
+
+    const handleRetryUpload = async () => {
+        const isAuthError = errorMsg?.includes('UNAUTHORIZED');
+
+        if (isAuthError) {
+            try {
+                setProcessingStatus('Re-authenticating...');
+                await signInWithGoogle();
+                // If sign in successful, try processing again
+                setPhase('processing');
+                processRecording();
+            } catch (err: any) {
+                setErrorMsg('Re-authentication failed: ' + err.message);
+            }
+        } else {
+            setPhase('setup');
+            setDuration(0);
+            setProgress(0);
+            setErrorMsg(null);
         }
     };
 
@@ -362,14 +390,26 @@ export default function RecordPage() {
                         </div>
                         <h2 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-2">Something went wrong</h2>
                         <p className="text-[hsl(var(--muted-foreground))] mb-8">{errorMsg}</p>
-                        <Button
-                            variant="default"
-                            onClick={() => { setPhase('setup'); setDuration(0); setProgress(0); setErrorMsg(null); }}
-                            className="shadow-lg shadow-[hsl(var(--primary)/0.2)]"
-                        >
-                            <RotateCcw className="w-4 h-4 mr-2" />
-                            Try Again
-                        </Button>
+                        <div className="flex flex-col gap-3">
+                            {errorMsg?.includes('UNAUTHORIZED') && (
+                                <Button
+                                    variant="default"
+                                    onClick={handleRetryUpload}
+                                    className="shadow-lg shadow-[hsl(var(--primary)/0.2)] bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                    <Play className="w-4 h-4 mr-2" />
+                                    Login Again & Resume
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                onClick={() => { setPhase('setup'); setDuration(0); setProgress(0); setErrorMsg(null); chunksRef.current = []; }}
+                                className="border-[hsl(var(--border))]"
+                            >
+                                <RotateCcw className="w-4 h-4 mr-2" />
+                                {errorMsg?.includes('UNAUTHORIZED') ? 'Discard & Start Over' : 'Try Again'}
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
