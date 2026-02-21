@@ -146,6 +146,9 @@ export async function listDriveRecordings(token: string): Promise<any[]> {
     );
 
     if (!response.ok) {
+        if (response.status === 401) {
+            throw new Error('UNAUTHORIZED: Please sign in again.');
+        }
         throw new Error('Failed to fetch recordings from Drive');
     }
 
@@ -158,4 +161,28 @@ export async function listDriveRecordings(token: string): Promise<any[]> {
         duration: parseInt(file.appProperties?.duration || '0'),
         createdAt: new Date(file.createdTime),
     }));
+}
+/**
+ * Deletes a file from Google Drive
+ * @param fileId The ID of the file to delete
+ * @param token The OAuth2 access token
+ */
+export async function deleteFileFromDrive(fileId: string, token: string): Promise<void> {
+    const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}`,
+        {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    if (!response.ok && response.status !== 404) {
+        if (response.status === 401) {
+            throw new Error('UNAUTHORIZED: Please sign in again.');
+        }
+        const error = await response.json();
+        throw new Error(error.error?.message || 'Failed to delete file from Drive');
+    }
 }

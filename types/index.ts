@@ -19,6 +19,12 @@ export interface Recording {
   thumbnailUrl?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  isStarred?: boolean;
+  startTime?: number; // in seconds
+  endTime?: number; // in seconds
+  isMuted?: boolean;
+  overlays?: any[];
+  folderId?: string | null;
 }
 
 export interface RecordingState {

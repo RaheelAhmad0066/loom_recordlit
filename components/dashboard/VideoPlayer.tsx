@@ -2,7 +2,7 @@ import { Recording } from "@/types";
 import { useEffect, useState, useRef } from "react";
 import { getDirectDownloadUrl } from "@/lib/utils/drive";
 import { getStoredAccessToken, signInWithGoogle } from "@/lib/firebase/auth";
-import { Loader2, AlertCircle, Play, Download, X, Copy, LogIn } from "lucide-react";
+import { Loader2, AlertCircle, Play, Download, X, Copy, LogIn, ArrowUpRight, Pencil, Share } from "lucide-react";
 
 export interface VideoPlayerProps {
     recording: Recording;
@@ -171,13 +171,100 @@ export function VideoPlayer({ recording, onClose }: VideoPlayerProps) {
                     )}
 
                     {videoUrl && (
-                        <video
-                            ref={videoRef}
-                            src={videoUrl}
-                            autoPlay
-                            controls
-                            className="w-full h-full object-contain"
-                        />
+                        <>
+                            <video
+                                ref={videoRef}
+                                src={videoUrl}
+                                autoPlay
+                                controls
+                                muted={recording.isMuted}
+                                className="w-full h-full object-contain"
+                                onTimeUpdate={() => {
+                                    if (videoRef.current && recording.endTime) {
+                                        if (videoRef.current.currentTime >= recording.endTime) {
+                                            // Only pause if not already paused
+                                            if (!videoRef.current.paused) {
+                                                videoRef.current.pause();
+                                            }
+                                            videoRef.current.currentTime = recording.endTime;
+                                        }
+                                    }
+                                }}
+                                onLoadedMetadata={() => {
+                                    if (videoRef.current && recording.startTime) {
+                                        videoRef.current.currentTime = recording.startTime;
+                                    }
+                                }}
+                            />
+
+                            {/* Overlays Layer - Read Only */}
+                            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                                {recording.overlays?.map((overlay: any) => (
+                                    <div
+                                        key={overlay.id}
+                                        className="absolute"
+                                        style={{
+                                            left: `${overlay.x}%`,
+                                            top: `${overlay.y}%`,
+                                            transform: `translate(-50%, -50%) scale(${overlay.scale}) rotate(${overlay.rotation || 0}deg)`,
+                                        }}
+                                    >
+                                        {overlay.type === 'text' ? (
+                                            <div
+                                                className="min-w-[100px] p-2 bg-black/60 rounded-lg border text-center font-bold text-xl backdrop-blur-sm"
+                                                style={{
+                                                    color: overlay.color || '#ffffff',
+                                                    borderColor: `${overlay.color || '#ffffff'}40`
+                                                }}
+                                            >
+                                                {overlay.content}
+                                            </div>
+                                        ) : overlay.content === 'arrow' ? (
+                                            <div className="relative flex items-center">
+                                                <svg
+                                                    width={overlay.width || 100}
+                                                    height="40"
+                                                    viewBox={`0 0 ${overlay.width || 100} 40`}
+                                                    className="drop-shadow-[0_0_15px_rgba(0,0,0,0.3)]"
+                                                    style={{ filter: `drop-shadow(0 0 15px ${(overlay.color || '#8b5cf6')}60)` }}
+                                                >
+                                                    <path
+                                                        d={`
+                                                            M 0,17 
+                                                            L ${Math.max(0, (overlay.width || 100) - 20)},17 
+                                                            L ${Math.max(0, (overlay.width || 100) - 20)},8 
+                                                            L ${overlay.width || 100},20 
+                                                            L ${Math.max(0, (overlay.width || 100) - 20)},32 
+                                                            L ${Math.max(0, (overlay.width || 100) - 20)},23 
+                                                            L 0,23 
+                                                            Z
+                                                        `}
+                                                        fill={overlay.color || '#8b5cf6'}
+                                                    />
+                                                </svg>
+                                                <div
+                                                    className="absolute inset-x-0 h-4 blur-2xl rounded-full -z-10"
+                                                    style={{ backgroundColor: `${(overlay.color || '#8b5cf6')}30`, top: '50%', transform: 'translateY(-50%)' }}
+                                                />
+                                            </div>
+                                        ) : overlay.content === 'pencil' ? (
+                                            <div className="relative">
+                                                <Pencil
+                                                    className="w-12 h-12 drop-shadow-[0_0_15px_rgba(0,0,0,0.3)]"
+                                                    style={{ color: overlay.color || '#10b981', filter: `drop-shadow(0 0 15px ${(overlay.color || '#10b981')}60)` }}
+                                                />
+                                                <div
+                                                    className="absolute inset-0 blur-2xl rounded-full -z-10"
+                                                    style={{ backgroundColor: `${(overlay.color || '#10b981')}30` }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <span className="text-[3rem] drop-shadow-lg">{overlay.content}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </>
                     )}
                 </div>
 
@@ -206,6 +293,24 @@ export function VideoPlayer({ recording, onClose }: VideoPlayerProps) {
                         >
                             <Copy className="w-4 h-4" />
                             Copy Link
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: recording.title,
+                                        text: `Check out this recording: ${recording.title}`,
+                                        url: recording.videoUrl
+                                    });
+                                } else {
+                                    navigator.clipboard.writeText(recording.videoUrl);
+                                    alert('Link copied to clipboard!');
+                                }
+                            }}
+                            className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm font-medium hover:bg-white/20 transition-all border border-white/10 flex items-center gap-2"
+                        >
+                            <Share className="w-4 h-4" />
+                            Share
                         </button>
                     </div>
                 </div>

@@ -11,6 +11,7 @@ import {
     deleteDoc,
     Timestamp,
     serverTimestamp,
+    addDoc,
 } from 'firebase/firestore';
 import { db } from './config';
 import { Recording } from '@/types';
@@ -56,6 +57,19 @@ export async function saveRecording(
         updatedAt: serverTimestamp(),
     });
     return recordingRef.id;
+}
+
+// Get single recording
+export async function getRecording(id: string): Promise<Recording | null> {
+    const recordingRef = doc(db, 'recordings', id);
+    const recordingDoc = await getDoc(recordingRef);
+    if (!recordingDoc.exists()) return null;
+    const data = recordingDoc.data();
+    return {
+        id: recordingDoc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+    } as Recording;
 }
 
 // Get user's recordings
@@ -109,4 +123,49 @@ export async function updateRecording(
 export async function deleteRecording(recordingId: string): Promise<void> {
     const recordingRef = doc(db, 'recordings', recordingId);
     await deleteDoc(recordingRef);
+}
+
+// FOLDERS
+
+export interface Folder {
+    id: string;
+    userId: string;
+    name: string;
+    createdAt: Date;
+}
+
+export async function createFolder(userId: string, name: string): Promise<string> {
+    const foldersRef = collection(db, 'folders');
+    const docRef = await addDoc(foldersRef, {
+        userId,
+        name,
+        createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+}
+
+export async function getUserFolders(userId: string): Promise<Folder[]> {
+    const foldersRef = collection(db, 'folders');
+    const q = query(foldersRef, where('userId', '==', userId));
+    const querySnapshot = await getDocs(q);
+
+    const folders = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+        };
+    }) as Folder[];
+
+    return folders.sort((a, b) => {
+        const dateA = a.createdAt instanceof Date ? a.createdAt.getTime() : 0;
+        const dateB = b.createdAt instanceof Date ? b.createdAt.getTime() : 0;
+        return dateB - dateA;
+    });
+}
+
+export async function deleteFolder(folderId: string): Promise<void> {
+    const folderRef = doc(db, 'folders', folderId);
+    await deleteDoc(folderRef);
 }

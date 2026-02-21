@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Video, Mic, MicOff, VideoIcon, VideoOff, Circle, ArrowLeft, Pause, Play, Square, Home, RotateCcw, Copy, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { Video, Mic, MicOff, VideoIcon, VideoOff, Circle, ArrowLeft, Edit2, Pause, Play, Square, Home, RotateCcw, Copy, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +12,7 @@ import { uploadToDrive } from '@/lib/utils/drive';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { WebcamOverlay } from '@/components/recording/WebcamOverlay';
 
-type Phase = 'setup' | 'countdown' | 'recording' | 'processing' | 'complete' | 'error';
+type Phase = 'setup' | 'countdown' | 'recording' | 'preview' | 'processing' | 'complete' | 'error';
 
 export default function RecordPage() {
     const { user } = useAuth();
@@ -28,6 +28,7 @@ export default function RecordPage() {
     const [copied, setCopied] = useState(false);
     const [shareLink, setShareLink] = useState('');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [title, setTitle] = useState('');
 
     // Recording refs
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -241,7 +242,9 @@ export default function RecordPage() {
             clearInterval(renderIntervalRef.current);
         }
 
-        setPhase('processing');
+        const defaultTitle = `RecordIt-${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        setTitle(defaultTitle);
+        setPhase('preview');
         setProgress(0);
     };
 
@@ -256,7 +259,7 @@ export default function RecordPage() {
             if (!token) throw new Error('UNAUTHORIZED: Google access token missing. Please log in again.');
 
             // Upload to Google Drive with progress updates
-            const fileName = `RecordIt-${new Date().toLocaleString()}.webm`;
+            const fileName = title.endsWith('.webm') ? title : `${title}.webm`;
             setProcessingStatus('Uploading to Google Drive...');
 
             const driveData = await uploadToDrive(blob, fileName, token, duration, (p) => {
@@ -467,6 +470,65 @@ export default function RecordPage() {
                         >
                             <Square className="w-5 h-5 fill-current" />
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ──── Preview / Naming Phase ──── */}
+            {phase === 'preview' && (
+                <div className="flex-1 flex items-center justify-center px-4">
+                    <div className="max-w-md w-full animate-fade-in-up">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-6">
+                                <Edit2 className="w-10 h-10 text-violet-500" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">Name your video</h2>
+                            <p className="text-[hsl(var(--muted-foreground))]">Give it a title before saving</p>
+                        </div>
+
+                        <div className="bg-[hsl(var(--card))] rounded-2xl border border-[hsl(var(--border))] p-6 mb-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label htmlFor="video-title" className="block text-sm font-medium text-[hsl(var(--muted-foreground))] mb-1.5 uppercase tracking-wider">
+                                        Title
+                                    </label>
+                                    <input
+                                        id="video-title"
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all text-lg font-medium"
+                                        placeholder="Enter video name..."
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <Button
+                                onClick={() => {
+                                    setPhase('processing');
+                                    processRecording();
+                                }}
+                                size="lg"
+                                className="w-full rounded-xl h-13 text-lg shadow-lg shadow-violet-500/20"
+                            >
+                                Upload & Save Video
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => {
+                                    if (confirm('Are you sure? This recording will be discarded.')) {
+                                        setPhase('setup');
+                                        chunksRef.current = [];
+                                    }
+                                }}
+                                className="text-[hsl(var(--muted-foreground))] hover:text-red-500"
+                            >
+                                Discard Recording
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
