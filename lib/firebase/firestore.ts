@@ -169,3 +169,4 @@ export async function deleteFolder(folderId: string): Promise<void> {
     const folderRef = doc(db, 'folders', folderId);
     await deleteDoc(folderRef);
 }
+

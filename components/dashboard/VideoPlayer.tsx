@@ -19,90 +19,38 @@ export function VideoPlayer({ recording, onClose }: VideoPlayerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        let objectUrl: string | null = null;
-        const abortController = new AbortController();
-
         const loadVideo = async () => {
             try {
-                setError(null);
-                setIsAuthError(false);
                 setLoading(true);
+                setError(null);
 
-                const token = getStoredAccessToken();
-                if (!token) {
-                    setIsAuthError(true);
-                    throw new Error("Authentication token missing. Please sign in again.");
+                if (!recording.storagePath) {
+                    throw new Error("Video file path is missing.");
                 }
 
+                // Get streaming URL (API Key based for public files)
                 const url = getDirectDownloadUrl(recording.storagePath);
 
-                const response = await fetch(url, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    signal: abortController.signal,
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        setIsAuthError(true);
-                        throw new Error("Session expired. Please log in again.");
-                    }
-                    throw new Error(`Failed to load video: ${response.statusText}`);
-                }
-
-                if (!response.body) {
-                    throw new Error("Response body is null");
-                }
-
-                const contentLength = response.headers.get("content-length");
-                const total = contentLength ? parseInt(contentLength, 10) : 0;
-                let loaded = 0;
-
-                const reader = response.body.getReader();
-                const chunks: BlobPart[] = [];
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    chunks.push(value);
-                    loaded += value.length;
-
-                    if (total > 0) {
-                        setProgress(Math.round((loaded / total) * 100));
-                    }
-                }
-
-                const blob = new Blob(chunks, { type: "video/webm" });
-                objectUrl = URL.createObjectURL(blob);
-                setVideoUrl(objectUrl);
+                // Directly set the URL for streaming
+                setVideoUrl(url);
                 setLoading(false);
             } catch (err: any) {
-                if (err.name !== "AbortError") {
-                    console.error("Video loading error:", err);
-                    setError(err.message || "An error occurred while loading the video.");
-                    setLoading(false);
-                }
+                console.error("Video streaming setup error:", err);
+                setError(err.message || "Failed to prepare video stream.");
+                setLoading(false);
             }
         };
 
         loadVideo();
-
-        return () => {
-            abortController.abort();
-            if (objectUrl) {
-                URL.revokeObjectURL(objectUrl);
-            }
-        };
-    }, [recording.storagePath, retryCount]);
+    }, [recording.storagePath]);
 
     const handleReauth = async () => {
         try {
             setLoading(true);
             setError(null);
             await signInWithGoogle();
-            setRetryCount(prev => prev + 1);
+            // Just refresh by re-triggering the effect if needed
+            window.location.reload();
         } catch (err: any) {
             setError("Re-authentication failed: " + err.message);
             setLoading(false);

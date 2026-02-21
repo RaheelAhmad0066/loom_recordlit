@@ -97,7 +97,8 @@ export async function uploadToDrive(
  * @returns The direct media download URL
  */
 export function getDirectDownloadUrl(fileId: string): string {
-    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
+    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
 }
 
 /**

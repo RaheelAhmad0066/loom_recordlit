@@ -84,6 +84,7 @@ export function Sidebar({ activeTab, onTabChange, onUpload }: SidebarProps) {
                             {item.label}
                         </button>
                     ))}
+
                 </div>
             </div>
 
@@ -97,7 +98,9 @@ export function Sidebar({ activeTab, onTabChange, onUpload }: SidebarProps) {
                     Upload Video
                 </button>
                 <Link href="/record">
-                    <button className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                    <button
+                        className="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                    >
                         <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
                         Record a video
                     </button>

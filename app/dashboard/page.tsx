@@ -77,6 +77,7 @@ export default function DashboardPage() {
         }
     }, [user, authLoading]);
 
+
     const fetchFolders = async () => {
         if (!user) return;
         try {
@@ -777,54 +778,58 @@ export default function DashboardPage() {
             </div>
 
             {/* Video Player Modal */}
-            {selectedVideo && (
-                <VideoPlayer
-                    recording={selectedVideo}
-                    onClose={() => setSelectedVideo(null)}
-                />
-            )}
+            {
+                selectedVideo && (
+                    <VideoPlayer
+                        recording={selectedVideo}
+                        onClose={() => setSelectedVideo(null)}
+                    />
+                )
+            }
 
             {/* Custom UI Modal */}
-            {modalConfig && (
-                <Modal
-                    isOpen={!!modalConfig}
-                    onClose={() => !isModalLoading && setModalConfig(null)}
-                    title={modalConfig.title}
-                    description={modalConfig.description}
-                    confirmLabel={modalConfig.confirmLabel}
-                    showInput={modalConfig.showInput}
-                    inputPlaceholder={modalConfig.inputPlaceholder}
-                    initialInputValue={modalConfig.initialValue}
-                    isLoading={isModalLoading}
-                    type={modalConfig.type.startsWith('delete') ? 'destructive' : 'primary'}
-                    onConfirm={(value) => {
-                        if (modalConfig.type === 'delete-recording' && modalConfig.targetId) {
-                            performDeleteRecording(modalConfig.targetId);
-                        } else if (modalConfig.type === 'delete-folder' && modalConfig.targetId) {
-                            performDeleteFolder(modalConfig.targetId);
-                        } else if (modalConfig.type === 'create') {
-                            performCreateFolder(value);
-                        } else if (modalConfig.type === 'upload') {
-                            performUpload(value);
-                        }
-                    }}
-                >
-                    {modalConfig.type === 'upload' && isModalLoading && (
-                        <div className="mt-4">
-                            <div className="flex justify-between text-xs mb-1 font-bold">
-                                <span>Uploading to Drive...</span>
-                                <span>{uploadProgress}%</span>
+            {
+                modalConfig && (
+                    <Modal
+                        isOpen={!!modalConfig}
+                        onClose={() => !isModalLoading && setModalConfig(null)}
+                        title={modalConfig.title}
+                        description={modalConfig.description}
+                        confirmLabel={modalConfig.confirmLabel}
+                        showInput={modalConfig.showInput}
+                        inputPlaceholder={modalConfig.inputPlaceholder}
+                        initialInputValue={modalConfig.initialValue}
+                        isLoading={isModalLoading}
+                        type={modalConfig.type.startsWith('delete') ? 'destructive' : 'primary'}
+                        onConfirm={(value) => {
+                            if (modalConfig.type === 'delete-recording' && modalConfig.targetId) {
+                                performDeleteRecording(modalConfig.targetId);
+                            } else if (modalConfig.type === 'delete-folder' && modalConfig.targetId) {
+                                performDeleteFolder(modalConfig.targetId);
+                            } else if (modalConfig.type === 'create') {
+                                performCreateFolder(value);
+                            } else if (modalConfig.type === 'upload') {
+                                performUpload(value);
+                            }
+                        }}
+                    >
+                        {modalConfig.type === 'upload' && isModalLoading && (
+                            <div className="mt-4">
+                                <div className="flex justify-between text-xs mb-1 font-bold">
+                                    <span>Uploading to Drive...</span>
+                                    <span>{uploadProgress}%</span>
+                                </div>
+                                <div className="w-full bg-[hsl(var(--accent))] h-2 rounded-full overflow-hidden">
+                                    <div
+                                        className="bg-[hsl(var(--primary))] h-full transition-all duration-300"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    />
+                                </div>
                             </div>
-                            <div className="w-full bg-[hsl(var(--accent))] h-2 rounded-full overflow-hidden">
-                                <div
-                                    className="bg-[hsl(var(--primary))] h-full transition-all duration-300"
-                                    style={{ width: `${uploadProgress}%` }}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </Modal>
-            )}
-        </div>
+                        )}
+                    </Modal>
+                )
+            }
+        </div >
     );
 }
