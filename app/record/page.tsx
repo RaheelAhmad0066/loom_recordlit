@@ -337,11 +337,11 @@ export default function RecordPage() {
             {phase === 'setup' && (
                 <div className="border-b border-[hsl(var(--border))] glass">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-                        <Link href="/dashboard" className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-                                <Video className="w-4 h-4 text-white" />
+                        <Link href="/dashboard" className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden">
+                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
                             </div>
-                            <span className="text-lg font-bold text-[hsl(var(--foreground))]">Record<span className="text-gradient">It</span></span>
+                            <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tighter">Record<span className="text-gradient">ly</span></span>
                         </Link>
                         <Link href="/dashboard">
                             <Button variant="ghost" size="sm" className="gap-2">

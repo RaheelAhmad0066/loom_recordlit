@@ -32,7 +32,7 @@ export function Footer() {
                             <div className="w-8 h-8 bg-[hsl(var(--primary))] rounded-lg flex items-center justify-center">
                                 <Video className="w-4 h-4 text-[hsl(var(--primary-foreground))]" />
                             </div>
-                            <span className="text-lg font-bold text-[hsl(var(--foreground))]">RecordIt</span>
+                            <span className="text-xl font-bold text-[hsl(var(--foreground))]">Recordly</span>
                         </div>
                         <p className="text-sm text-[hsl(var(--muted-foreground))] leading-relaxed">
                             Professional screen recording made simple. Record, share, and collaborate effortlessly.
@@ -64,7 +64,7 @@ export function Footer() {
                 {/* Bottom */}
                 <div className="border-t border-[hsl(var(--border))] pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                        © {currentYear} RecordIt. All rights reserved.
+                        © {currentYear} Recordly. All rights reserved.
                     </p>
                     <div className="flex items-center gap-4">
                         {['Twitter', 'GitHub', 'LinkedIn'].map((social) => (

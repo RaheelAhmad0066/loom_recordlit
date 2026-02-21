@@ -59,11 +59,11 @@ export default function LoginPage() {
                     <div className="hidden lg:block animate-fade-in-up">
                         <div className="space-y-8">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
-                                    <Video className="w-7 h-7 text-white" />
+                                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-lg shadow-indigo-100 overflow-hidden">
+                                    <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
                                 </div>
                                 <div>
-                                    <h1 className="text-3xl font-bold text-[hsl(var(--foreground))]">Record<span className="text-gradient">It</span></h1>
+                                    <h1 className="text-3xl font-black text-[hsl(var(--foreground))] tracking-tighter">Record<span className="text-gradient">ly</span></h1>
                                     <p className="text-sm text-[hsl(var(--muted-foreground))]">Professional Screen Recording</p>
                                 </div>
                             </div>
@@ -106,10 +106,10 @@ export default function LoginPage() {
                             <div className="relative bg-[hsl(var(--card))] rounded-2xl shadow-2xl border border-[hsl(var(--border))] p-8 md:p-10">
                                 {/* Mobile Logo */}
                                 <div className="lg:hidden flex items-center gap-3 mb-8">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                                        <Video className="w-5 h-5 text-white" />
+                                    <div className="w-10 h-10 bg-white shadow-md rounded-xl flex items-center justify-center overflow-hidden">
+                                        <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
                                     </div>
-                                    <span className="text-2xl font-bold text-[hsl(var(--foreground))]">Record<span className="text-gradient">It</span></span>
+                                    <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tighter">Record<span className="text-gradient">ly</span></span>
                                 </div>
 
                                 <div className="text-center mb-8">

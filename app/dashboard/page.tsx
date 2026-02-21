@@ -357,12 +357,12 @@ export default function DashboardPage() {
             <header className="h-16 border-b border-[hsl(var(--border)/0.5)] glass sticky top-0 z-40 bg-[hsl(var(--background)/0.8)] backdrop-blur-xl">
                 <div className="max-w-[1600px] mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
                     <div className="flex items-center gap-8">
-                        <Link href="/" className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                                <Video className="w-5 h-5 text-white" />
+                        <Link href="/" className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200 overflow-hidden">
+                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
                             </div>
-                            <h1 className="text-xl font-bold text-[hsl(var(--foreground))] hidden md:block">
-                                Record<span className="text-gradient">It</span>
+                            <h1 className="text-2xl font-black text-[hsl(var(--foreground))] hidden md:block tracking-tighter">
+                                Record<span className="text-gradient">ly</span>
                             </h1>
                         </Link>
 

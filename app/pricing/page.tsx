@@ -72,12 +72,12 @@ export default function PricingPage() {
             <nav className="sticky top-0 z-50 w-full border-b border-[hsl(var(--border)/0.5)] glass">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
-                        <Link href="/" className="flex items-center gap-2.5">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25">
-                                <Video className="h-5 w-5 text-white" />
+                        <Link href="/" className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-indigo-100 overflow-hidden">
+                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
                             </div>
-                            <span className="text-xl font-bold text-[hsl(var(--foreground))]">
-                                Record<span className="text-gradient">It</span>
+                            <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tighter">
+                                Record<span className="text-gradient">ly</span>
                             </span>
                         </Link>
                         <div className="flex items-center gap-3">
@@ -112,8 +112,8 @@ export default function PricingPage() {
                         <button
                             onClick={() => setAnnual(false)}
                             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${!annual
-                                    ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
-                                    : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                                ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                                : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                                 }`}
                         >
                             Monthly
@@ -121,8 +121,8 @@ export default function PricingPage() {
                         <button
                             onClick={() => setAnnual(true)}
                             className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${annual
-                                    ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
-                                    : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
+                                ? 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))] shadow-sm'
+                                : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
                                 }`}
                         >
                             Annual
@@ -139,8 +139,8 @@ export default function PricingPage() {
                         <div
                             key={i}
                             className={`relative rounded-2xl p-8 border transition-all duration-300 hover-lift ${plan.badge
-                                    ? 'border-[hsl(var(--primary))] bg-[hsl(var(--card))] shadow-xl shadow-[hsl(var(--primary)/0.1)] ring-1 ring-[hsl(var(--primary)/0.2)]'
-                                    : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
+                                ? 'border-[hsl(var(--primary))] bg-[hsl(var(--card))] shadow-xl shadow-[hsl(var(--primary)/0.1)] ring-1 ring-[hsl(var(--primary)/0.2)]'
+                                : 'border-[hsl(var(--border))] bg-[hsl(var(--card))]'
                                 }`}
                         >
                             {plan.badge && (
@@ -165,8 +165,8 @@ export default function PricingPage() {
                                 <Button
                                     variant={plan.ctaVariant}
                                     className={`w-full rounded-xl h-11 mb-8 ${plan.badge
-                                            ? 'shadow-lg shadow-[hsl(var(--primary)/0.2)]'
-                                            : ''
+                                        ? 'shadow-lg shadow-[hsl(var(--primary)/0.2)]'
+                                        : ''
                                         }`}
                                 >
                                     {plan.cta}
@@ -210,12 +210,12 @@ export default function PricingPage() {
             <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
-                            <Video className="w-3.5 h-3.5 text-white" />
+                        <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center overflow-hidden">
+                            <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <span className="text-base font-bold text-[hsl(var(--foreground))]">RecordIt</span>
+                        <span className="text-lg font-black text-[hsl(var(--foreground))] tracking-tighter">Recordly</span>
                     </div>
-                    <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 RecordIt. All rights reserved.</p>
+                    <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 Recordly. All rights reserved.</p>
                 </div>
             </footer>
         </div>

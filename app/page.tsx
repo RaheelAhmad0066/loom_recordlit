@@ -58,12 +58,12 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25 group-hover:scale-105 transition-transform">
-                <Video className="h-5 w-5 text-white" />
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-indigo-100 group-hover:scale-105 transition-transform overflow-hidden">
+                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
               </div>
-              <span className="text-xl font-bold tracking-tight text-[hsl(var(--foreground))]">
-                Record<span className="text-gradient">It</span>
+              <span className="text-2xl font-black tracking-tighter text-[hsl(var(--foreground))]">
+                Record<span className="text-gradient">ly</span>
               </span>
             </Link>
 
@@ -203,7 +203,7 @@ export default function LandingPage() {
                       <div className="h-7 w-full max-w-sm bg-[hsl(var(--background)/0.5)] rounded-lg flex items-center justify-center border border-[hsl(var(--border)/0.5)]">
                         <div className="flex items-center gap-2 text-xs text-[hsl(var(--muted-foreground))]">
                           <Shield className="w-3 h-3" />
-                          <span>recordit.dev/demo/v/8s9d7f</span>
+                          <span>recordly.dev/demo/v/8s9d7f</span>
                         </div>
                       </div>
                     </div>
@@ -380,7 +380,7 @@ export default function LandingPage() {
                   Stop Typing. <br className="sm:hidden" /> Start Recording.
                 </h2>
                 <p className="mb-10 text-lg sm:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-                  Join 2 million+ people who use RecordIt to save time and communicate with clarity.
+                  Join 2 million+ people who use Recordly to save time and communicate with clarity.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -408,11 +408,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
             <div className="col-span-2">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                  <Video className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
+                  <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
                 </div>
-                <span className="text-2xl font-bold text-[hsl(var(--foreground))]">RecordIt</span>
+                <span className="text-2xl font-black tracking-tighter text-[hsl(var(--foreground))]">Recordly</span>
               </div>
               <p className="text-[hsl(var(--muted-foreground))] leading-relaxed max-w-xs mb-6">
                 The fastest way to share screen recordings. Built for developers, designers, and fast-moving teams.
@@ -448,7 +448,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-[hsl(var(--border))] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 RecordIt Inc. All rights reserved.</p>
+            <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 Recordly Inc. All rights reserved.</p>
             <div className="flex gap-8 text-sm text-[hsl(var(--muted-foreground))]">
               <a href="#" className="hover:text-[hsl(var(--foreground))]">Privacy Policy</a>
               <a href="#" className="hover:text-[hsl(var(--foreground))]">Terms of Service</a>
