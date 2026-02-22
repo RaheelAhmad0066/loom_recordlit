@@ -7,6 +7,45 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': [
+    {
+      '@type': 'Question',
+      'name': 'Is Recordly really a free screen recorder?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Yes! Recordly offers unlimited screen recording for free. You can capture your screen, webcam, and audio without any hidden costs.'
+      }
+    },
+    {
+      '@type': 'Question',
+      'name': 'How do I share my screen recordings?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Once you finish recording your screen, Recordly automatically generates a shareable link. You can paste this link anywhere — Slack, email, or Jira.'
+      }
+    },
+    {
+      '@type': 'Question',
+      'name': 'Do I need to download any software?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'No. Recordly is a 100% browser-based screen recording tool. It works directly in Chrome, Edge, and Safari without any installations.'
+      }
+    },
+    {
+      '@type': 'Question',
+      'name': 'Do you have a Chrome extension?',
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': 'Yes, Recordly has a Chrome extension that allows you to start recording any tab with just one click.'
+      }
+    }
+  ]
+};
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
@@ -53,16 +92,18 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-[hsl(var(--background))] overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       {/* Navigation */}
       <nav className="sticky top-0 z-50 w-full border-b border-[hsl(var(--border)/0.5)] glass">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-indigo-100 group-hover:scale-105 transition-transform overflow-hidden">
-                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
-              </div>
-              <span className="text-2xl font-black tracking-tighter text-[hsl(var(--foreground))]">
+              <img src="/logo.png" alt="Recordly Logo" className="w-12 h-12 object-contain group-hover:scale-110 transition-transform" />
+              <span className="text-2xl font-black tracking-tight text-[hsl(var(--foreground))]">
                 Record<span className="text-gradient">ly</span>
               </span>
             </Link>
@@ -148,13 +189,12 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[hsl(var(--foreground))] leading-[1.1]">
-                  Screen Recording <br />
-                  <span className="text-gradient">Reimagined.</span>
+                  Free Online <br />
+                  <span className="text-gradient">Screen Recorder.</span>
                 </h1>
 
                 <p className="max-w-[580px] text-lg sm:text-xl text-[hsl(var(--muted-foreground))] leading-relaxed mx-auto lg:mx-0">
-                  Record your screen in HD, auto-upload to Cloud, and share with a single link.
-                  Designed for speed, built for professionals.
+                  The best free Loom alternative for professionals. Record your screen in HD, auto-upload to Cloud, and share with a single link — no downloads required.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
@@ -401,6 +441,30 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ──────────── FAQ Section (SEO Boost) ──────────── */}
+        <section className="py-24 sm:py-32 bg-[hsl(var(--background))] border-t border-[hsl(var(--border)/0.5)]">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--foreground))] mb-4">Frequently Asked Questions</h2>
+              <p className="text-[hsl(var(--muted-foreground))]">Everything you need to know about the best online screen recorder.</p>
+            </div>
+            <div className="space-y-6">
+              {[
+                { q: "Is Recordly really a free screen recorder?", a: "Yes! Recordly offers unlimited screen recording for free. You can capture your screen, webcam, and audio without any hidden costs." },
+                { q: "How do I share my screen recordings?", a: "Once you finish recording your screen, Recordly automatically generates a shareable link. You can paste this link anywhere — Slack, email, or Jira." },
+                { q: "Do I need to download any software?", a: "No. Recordly is a 100% browser-based screen recording tool. It works directly in Chrome, Edge, and Safari without any installations." },
+                { q: "Is there a limit on recording duration?", a: "Our free plan allows for unlimited recordings. We believe in providing the best screen recording experience without limiting your content." },
+                { q: "Can I record my webcam and screen at the same time?", a: "Absolutely. Recordly features a webcam overlay that allows you to record your face and screen simultaneously, perfect for tutorials and demos." }
+              ].map((faq, i) => (
+                <div key={i} className="bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-2xl p-6 hover:border-[hsl(var(--primary)/0.3)] transition-colors shadow-sm">
+                  <h3 className="text-lg font-bold text-[hsl(var(--foreground))] mb-2">{faq.q}</h3>
+                  <p className="text-[hsl(var(--muted-foreground))] leading-relaxed">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* ──────────── Footer ──────────── */}
@@ -409,10 +473,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
             <div className="col-span-2">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg overflow-hidden">
-                  <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
-                </div>
-                <span className="text-2xl font-black tracking-tighter text-[hsl(var(--foreground))]">Recordly</span>
+                <img src="/logo.png" alt="Recordly Logo" className="w-12 h-12 object-contain" />
+                <span className="text-2xl font-black tracking-tight text-[hsl(var(--foreground))]">Recordly</span>
               </div>
               <p className="text-[hsl(var(--muted-foreground))] leading-relaxed max-w-xs mb-6">
                 The fastest way to share screen recordings. Built for developers, designers, and fast-moving teams.

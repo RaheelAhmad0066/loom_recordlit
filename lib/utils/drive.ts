@@ -94,11 +94,13 @@ export async function uploadToDrive(
 /**
  * Gets a direct download URL for a file in Google Drive
  * @param fileId The ID of the file
+ * @param useApiKey Whether to include the API key in the URL (default: true)
  * @returns The direct media download URL
  */
-export function getDirectDownloadUrl(fileId: string): string {
+export function getDirectDownloadUrl(fileId: string, useApiKey: boolean = true): string {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_API_KEY;
-    return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+    const baseUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+    return (useApiKey && apiKey) ? `${baseUrl}&key=${apiKey}` : baseUrl;
 }
 
 /**

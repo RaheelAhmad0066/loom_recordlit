@@ -73,8 +73,8 @@ export default function PricingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-indigo-100 overflow-hidden">
-                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 shadow-lg shadow-indigo-500/20 overflow-hidden border border-white/10">
+                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5 brightness-0 invert" />
                             </div>
                             <span className="text-2xl font-bold text-[hsl(var(--foreground))] tracking-tighter">
                                 Record<span className="text-gradient">ly</span>
@@ -210,10 +210,8 @@ export default function PricingPage() {
             <footer className="border-t border-[hsl(var(--border))] bg-[hsl(var(--muted)/0.3)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center overflow-hidden">
-                            <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1" />
-                        </div>
-                        <span className="text-lg font-bold text-[hsl(var(--foreground))] tracking-tighter">Recordly</span>
+                        <img src="/logo.png" alt="Recordly Logo" className="w-12 h-12 object-contain transition-transform group-hover:scale-110" />
+                        <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tight">Recordly</span>
                     </div>
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 Recordly. All rights reserved.</p>
                 </div>

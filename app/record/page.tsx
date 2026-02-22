@@ -223,7 +223,7 @@ export default function RecordPage() {
         };
 
         recorder.onstop = () => {
-            processRecording();
+            // Decoupled: Don't auto-process, wait for user to click "Upload" in preview screen
             audioContext.close();
         };
 
@@ -313,6 +313,17 @@ export default function RecordPage() {
             setPhase('complete');
         } catch (err: any) {
             console.error('Processing error:', err);
+
+            // Auto-redirect if Google Drive API is disabled
+            const driveApiLinkMatch = err.message?.match(/https:\/\/console\.developers\.google\.com\/apis\/api\/drive\.googleapis\.com\/overview\?project=\d+/);
+            if (driveApiLinkMatch) {
+                setProcessingStatus('Redirecting to Google Cloud Console to enable Drive API...');
+                setTimeout(() => {
+                    window.location.href = driveApiLinkMatch[0];
+                }, 2000);
+                return;
+            }
+
             setErrorMsg(err.message || 'Failed to save recording');
             setPhase('error');
         } finally {
@@ -365,10 +376,8 @@ export default function RecordPage() {
                 <div className="border-b border-[hsl(var(--border))] glass">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
                         <Link href="/dashboard" className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden">
-                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
-                            </div>
-                            <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tighter">Record<span className="text-gradient">ly</span></span>
+                            <img src="/logo.png" alt="Recordly Logo" className="w-12 h-12 object-contain transition-transform hover:scale-110" />
+                            <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tight">Recordly</span>
                         </Link>
                         <Link href="/dashboard">
                             <Button variant="ghost" size="sm" className="gap-2">
@@ -523,8 +532,8 @@ export default function RecordPage() {
                 <div className="flex-1 flex items-center justify-center px-4">
                     <div className="max-w-md w-full animate-fade-in-up">
                         <div className="text-center mb-8">
-                            <div className="w-20 h-20 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-6">
-                                <Edit2 className="w-10 h-10 text-violet-500" />
+                            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-500/20 border border-white/10 overflow-hidden">
+                                <img src="/logo.png" alt="Recordly" className="w-full h-full object-contain p-3.5 brightness-0 invert" />
                             </div>
                             <h2 className="text-3xl font-bold text-[hsl(var(--foreground))] mb-2">Name your video</h2>
                             <p className="text-[hsl(var(--muted-foreground))]">Give it a title before saving</p>

@@ -100,7 +100,7 @@ function EditPageContent() {
             if (abortControllerRef.current) abortControllerRef.current.abort();
             abortControllerRef.current = new AbortController();
 
-            const url = getDirectDownloadUrl(recording.storagePath);
+            const url = getDirectDownloadUrl(recording.storagePath, false);
             const response = await fetch(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -117,7 +117,9 @@ function EditPageContent() {
                     }, 2000);
                     return;
                 }
-                throw new Error(`Failed to load video: ${response.statusText}`);
+                const errorDetail = await response.text().catch(() => "");
+                console.error(`Fetch failed: ${response.status} ${response.statusText}`, errorDetail);
+                throw new Error(`Failed to load video: ${response.status} ${response.statusText || 'Unknown Error'}`);
             }
 
             if (!response.body) {
@@ -795,15 +797,6 @@ function EditPageContent() {
                                 <div className="flex flex-col items-start">
                                     <span className="font-bold">Noise Reduction</span>
                                     <span className="text-[10px] opacity-60">{noiseReduction ? 'Enhanced Audio Enabled' : 'Simulate Studio Quality'}</span>
-                                </div>
-                            </button>
-                            <button className="w-full flex items-center gap-3 p-3 rounded-2xl bg-[hsl(var(--accent))] border border-transparent hover:border-violet-500/30 transition-all text-sm group">
-                                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                                    <Maximize className="w-4 h-4" />
-                                </div>
-                                <div className="flex flex-col items-start">
-                                    <span className="font-bold">Canvas Resize</span>
-                                    <span className="text-[10px] opacity-60">Optimize for Social Media</span>
                                 </div>
                             </button>
 

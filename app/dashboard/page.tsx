@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Video, Plus, Grid, List, Moon, Sun, LogOut, ExternalLink, MoreVertical, Copy, Download, Edit2, Trash2, Play, Search, Filter, Star, Scissors, Users, FolderOpen, HelpCircle, Share2, Check, ArrowLeft } from 'lucide-react';
+import { Search, Plus, Grid, List, Play, Check, Copy, Scissors, Trash2, ExternalLink, Moon, Sun, LogOut, Star, Share2, Menu, X, MoreVertical, Download, Edit2, Filter, FolderOpen, HelpCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -44,6 +44,7 @@ export default function DashboardPage() {
     const [selectedVideo, setSelectedVideo] = useState<Recording | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editTitle, setEditTitle] = useState('');
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<TabId>('library');
     const [folders, setFolders] = useState<Folder[]>([]);
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
@@ -356,12 +357,18 @@ export default function DashboardPage() {
             {/* Header - Fixed to Top */}
             <header className="h-16 border-b border-[hsl(var(--border)/0.5)] glass sticky top-0 z-40 bg-[hsl(var(--background)/0.8)] backdrop-blur-xl">
                 <div className="max-w-[1600px] mx-auto h-full px-4 sm:px-6 flex items-center justify-between">
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-4 sm:gap-8">
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+                            className="p-2 -ml-2 rounded-xl hover:bg-[hsl(var(--accent))] lg:hidden transition-colors text-[hsl(var(--muted-foreground))]"
+                        >
+                            {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200 overflow-hidden">
-                                <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
-                            </div>
-                            <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] hidden md:block tracking-tighter">
+                            <img src="/logo.png" alt="Recordly Logo" className="w-12 h-12 object-contain transition-transform hover:scale-110" />
+                            <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] hidden md:block tracking-tight">
                                 Record<span className="text-gradient">ly</span>
                             </h1>
                         </Link>
@@ -376,6 +383,12 @@ export default function DashboardPage() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-11 pr-4 py-2 rounded-xl bg-[hsl(var(--accent))] border-none text-sm focus:ring-2 focus:ring-[hsl(var(--primary)/0.2)] transition-all placeholder:text-[hsl(var(--muted-foreground)/0.7)]"
                             />
+                        </div>
+                        {/* Extension Prompt - Mobile/Small Desktop Hidden */}
+                        <div className="hidden xl:flex items-center gap-3">
+                            <img src="/logo.png" className="w-8 h-8 object-contain" alt="Recordly" />
+                            <span className="text-[11px] font-bold text-[hsl(var(--primary))] uppercase tracking-tight">Recordly Extension:</span>
+                            <a href="#" className="text-[11px] font-black text-[hsl(var(--foreground))] hover:underline decoration-[hsl(var(--primary))] underline-offset-2">Install for 1-click recording →</a>
                         </div>
                     </div>
 
@@ -416,8 +429,16 @@ export default function DashboardPage() {
                 {/* Sidebar */}
                 <Sidebar
                     activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    onUpload={() => document.getElementById('video-upload')?.click()}
+                    onTabChange={(tab) => {
+                        setActiveTab(tab);
+                        setMobileSidebarOpen(false);
+                    }}
+                    onUpload={() => {
+                        document.getElementById('video-upload')?.click();
+                        setMobileSidebarOpen(false);
+                    }}
+                    isOpen={mobileSidebarOpen}
+                    onClose={() => setMobileSidebarOpen(false)}
                 />
 
                 {/* Content Area */}
@@ -478,9 +499,7 @@ export default function DashboardPage() {
                                     </div>
                                 ) : displayedRecordings.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center py-24 bg-[hsl(var(--card))] border border-[hsl(var(--border)/0.5)] rounded-[2.5rem] shadow-sm animate-fade-in-up">
-                                        <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/20 dark:to-indigo-900/20 rounded-3xl flex items-center justify-center mb-6">
-                                            {activeTab === 'starred' ? <Star className="w-10 h-10 text-[hsl(var(--primary))]" /> : <Video className="w-10 h-10 text-[hsl(var(--primary))]" />}
-                                        </div>
+                                        <img src="/logo.png" alt="Recordly" className="w-32 h-32 object-contain mb-8 transition-all hover:rotate-3" />
                                         <h3 className="text-2xl font-bold text-[hsl(var(--foreground))] mb-2">
                                             {activeTab === 'starred' ? 'No starred videos' : 'Ready to record?'}
                                         </h3>

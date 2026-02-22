@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --jamni-gradient: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    }
+
+    body {
+      width: 320px;
+      padding: 0;
+      margin: 0;
+      font-family: 'Outfit', sans-serif;
+      background: #ffffff;
+      color: #1f2937;
+    }
+
+    .header {
+      padding: 24px 20px;
+      background: var(--jamni-gradient);
+      color: white;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .logo-img {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      margin: 0 auto 12px;
+      display: block;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .content {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+
+    .footer {
+      padding: 16px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      text-align: center;
+      border-top: 1px solid #f3f4f6;
+      background: #fcfcfd;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <img src="logo.png" alt="Recordly" class="logo-img">
+    <h1>Recordly</h1>
+  </div>
+  <div class="content">
+    <button id="startBtn" class="btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+        <circle cx="12" cy="12" r="5" fill="#ef4444" />
+      </svg>
+      Start Recording
+    </button>
+    <div id="status" class="status">Ready to capture tab</div>
+  </div>
+  <div class="footer">
+    Go to <a href="https://recordly.dev" target="_blank">recordly.dev</a> for settings
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
