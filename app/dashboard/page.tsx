@@ -65,6 +65,7 @@ export default function DashboardPage() {
     } | null>(null);
     const [isModalLoading, setIsModalLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const uploadAbortControllerRef = React.useRef<AbortController | null>(null);
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -298,10 +299,11 @@ export default function DashboardPage() {
         try {
             setIsModalLoading(true);
 
-            // 1. Upload to Drive
+            // 1. Upload to Drive with abort support
+            uploadAbortControllerRef.current = new AbortController();
             const driveData = await uploadVideo(file, title.trim(), (progress) => {
                 setUploadProgress(progress.percentage);
-            });
+            }, uploadAbortControllerRef.current.signal);
 
             // 2. Save to Firestore
             const videoUrl = await getShareableLink(driveData.fileId);
@@ -322,7 +324,12 @@ export default function DashboardPage() {
             fetchRecordings();
             setModalConfig(null);
             setUploadProgress(0);
+            uploadAbortControllerRef.current = null;
         } catch (error: any) {
+            if (error.name === 'AbortError') {
+                console.log('Upload aborted by user');
+                return;
+            }
             console.error('Upload error details:', error);
             // Try to extract a useful message
             const errorMsg = error.message ||
@@ -332,6 +339,7 @@ export default function DashboardPage() {
             alert('Failed to upload video: ' + errorMsg);
         } finally {
             setIsModalLoading(false);
+            uploadAbortControllerRef.current = null;
         }
     };
 
@@ -524,18 +532,41 @@ export default function DashboardPage() {
                                             >
                                                 {/* Thumbnail Container */}
                                                 <div className={`bg-gradient-to-br ${colorPresets[i % colorPresets.length]} relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-full flex-shrink-0' : 'aspect-video'}`}>
+                                                    {/* Background Decorative Patterns */}
+                                                    {!recording.thumbnailUrl && (
+                                                        <>
+                                                            {/* Noise Texture */}
+                                                            <div className="absolute inset-0 opacity-[0.2] mix-blend-overlay pointer-events-none">
+                                                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150" />
+                                                            </div>
+
+                                                            {/* Dots Pattern */}
+                                                            <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+
+                                                            {/* Glassy Glow */}
+                                                            <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-white/20 blur-[80px] rounded-full pointer-events-none" />
+
+                                                            {/* Subtle Watermark Logo */}
+                                                            <div className="absolute right-4 bottom-4 opacity-[0.08] transform rotate-[-15deg] pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-transform duration-700">
+                                                                <img src="/logo.png" className="w-24 h-24 object-contain filter grayscale invert" alt="" />
+                                                            </div>
+                                                        </>
+                                                    )}
+
                                                     {recording.thumbnailUrl ? (
-                                                        <img src={recording.thumbnailUrl} alt={recording.title} className="w-full h-full object-cover" />
+                                                        <img src={recording.thumbnailUrl} alt={recording.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                                     ) : (
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/5 group-hover:bg-black/20 transition-all duration-500">
-                                                            <div className="w-11 h-11 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-all duration-500 shadow-xl">
-                                                                <Play className="w-5 h-5 fill-current ml-0.5" />
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-all duration-500">
+                                                            <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-500 shadow-[0_0_40px_rgba(0,0,0,0.1)]">
+                                                                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+                                                                    <Play className="w-6 h-6 fill-current ml-1" />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}
 
-                                                    {/* Duration Tag */}
-                                                    <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-lg border border-white/10">
+                                                    {/* Duration Tag - Premium Pill */}
+                                                    <div className="absolute bottom-3 right-3 bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-full border border-white/20 shadow-xl transition-all group-hover:bg-white/20 group-hover:translate-y-[-2px]">
                                                         {formatDuration(recording.duration)}
                                                     </div>
                                                 </div>
@@ -690,16 +721,31 @@ export default function DashboardPage() {
                                                 >
                                                     {/* Same card UI as Library for consistency */}
                                                     <div className={`bg-gradient-to-br ${colorPresets[i % colorPresets.length]} relative overflow-hidden ${viewMode === 'list' ? 'w-48 h-full flex-shrink-0' : 'aspect-video'}`}>
+                                                        {!recording.thumbnailUrl && (
+                                                            <>
+                                                                <div className="absolute inset-0 opacity-[0.2] mix-blend-overlay pointer-events-none">
+                                                                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] brightness-100 contrast-150" />
+                                                                </div>
+                                                                <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                                                                <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-white/20 blur-[80px] rounded-full pointer-events-none" />
+                                                                <div className="absolute right-4 bottom-4 opacity-[0.08] transform rotate-[-15deg] pointer-events-none group-hover:scale-110 group-hover:rotate-0 transition-transform duration-700">
+                                                                    <img src="/logo.png" className="w-24 h-24 object-contain filter grayscale invert" alt="" />
+                                                                </div>
+                                                            </>
+                                                        )}
+
                                                         {recording.thumbnailUrl ? (
-                                                            <img src={recording.thumbnailUrl} alt={recording.title} className="w-full h-full object-cover" />
+                                                            <img src={recording.thumbnailUrl} alt={recording.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                                         ) : (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/5 group-hover:bg-black/20 transition-all duration-500">
-                                                                <div className="w-11 h-11 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-all duration-500 shadow-xl">
-                                                                    <Play className="w-5 h-5 fill-current ml-0.5" />
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-all duration-500">
+                                                                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 flex items-center justify-center text-white scale-90 group-hover:scale-100 opacity-0 group-hover:opacity-100 transition-all duration-500 shadow-[0_0_40px_rgba(0,0,0,0.1)]">
+                                                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white">
+                                                                        <Play className="w-6 h-6 fill-current ml-1" />
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         )}
-                                                        <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-lg border border-white/10">
+                                                        <div className="absolute bottom-3 right-3 bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-[11px] font-black px-2.5 py-1 rounded-full border border-white/20 shadow-xl transition-all group-hover:bg-white/20 group-hover:translate-y-[-2px]">
                                                             {formatDuration(recording.duration)}
                                                         </div>
                                                     </div>
@@ -811,7 +857,12 @@ export default function DashboardPage() {
                 modalConfig && (
                     <Modal
                         isOpen={!!modalConfig}
-                        onClose={() => !isModalLoading && setModalConfig(null)}
+                        onClose={() => {
+                            if (isModalLoading && uploadAbortControllerRef.current) {
+                                uploadAbortControllerRef.current.abort();
+                            }
+                            setModalConfig(null);
+                        }}
                         title={modalConfig.title}
                         description={modalConfig.description}
                         confirmLabel={modalConfig.confirmLabel}

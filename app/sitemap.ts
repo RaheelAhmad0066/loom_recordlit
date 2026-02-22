@@ -7,7 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         {
             url: baseUrl,
             lastModified: new Date(),
-            changeFrequency: 'weekly',
+            changeFrequency: 'daily',
             priority: 1,
         },
         {
@@ -23,10 +23,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.5,
         },
         {
-            url: `${baseUrl}/dashboard`,
+            url: `${baseUrl}/record`,
             lastModified: new Date(),
-            changeFrequency: 'always',
-            priority: 0.1, // Don't want private pages ranking high
+            changeFrequency: 'never',
+            priority: 0.3,
         },
     ];
 }

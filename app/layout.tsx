@@ -17,11 +17,11 @@ export const viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://recordly.dev'),
   title: {
-    default: 'Recordly - #1 Free Online Screen Recorder | Best Loom Alternative',
+    default: 'Recordly - #1 Free Online Screen Recorder | Best Loom Alternative | No Download',
     template: '%s | Recordly'
   },
-  description: 'The best free online screen recorder for professionals. Record your screen, webcam, and audio with one click. Auto-upload to Google Drive and share instantly. No download required.',
-  keywords: ['online screen recorder', 'free screen recorder', 'no download screen recorder', 'best loom alternative', 'chrome extension', 'screen capture', 'video recording', 'recordly', 'product demo', 'tutorial maker'],
+  description: '100% Free online screen recorder for professionals. Record your screen, webcam, and audio in HD with NO download required. Best Loom alternative for Chrome and Mac. Auto-upload to Google Drive and share instantly.',
+  keywords: ['online screen recorder', 'free screen recorder', 'no download screen recorder', 'best loom alternative', 'chrome screen recorder', 'screen recording software free', 'screen capture online', 'recordly', 'product demo videos', 'tutorial maker'],
   authors: [{ name: 'Recordly Team' }],
   alternates: {
     canonical: 'https://recordly.dev',

@@ -155,7 +155,8 @@ export async function getOrCreateFolder(): Promise<string> {
 export async function uploadVideo(
     file: Blob,
     title: string,
-    onProgress?: (progress: UploadProgress) => void
+    onProgress?: (progress: UploadProgress) => void,
+    signal?: AbortSignal
 ): Promise<{ fileId: string; webViewLink: string }> {
     await signInToDrive();
 
@@ -207,6 +208,13 @@ export async function uploadVideo(
             console.error('XHR Upload Error:', err);
             reject(new Error('Upload failed (XHR error)'));
         };
+
+        if (signal) {
+            signal.addEventListener('abort', () => {
+                xhr.abort();
+                reject(new DOMException('Aborted', 'AbortError'));
+            });
+        }
 
         console.log('Sending XHR request to Drive API...');
         xhr.send(formData);

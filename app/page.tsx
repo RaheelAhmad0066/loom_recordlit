@@ -189,12 +189,12 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[hsl(var(--foreground))] leading-[1.1]">
-                  Free Online <br />
+                  Best Free Online <br />
                   <span className="text-gradient">Screen Recorder.</span>
                 </h1>
 
                 <p className="max-w-[580px] text-lg sm:text-xl text-[hsl(var(--muted-foreground))] leading-relaxed mx-auto lg:mx-0">
-                  The best free Loom alternative for professionals. Record your screen in HD, auto-upload to Cloud, and share with a single link — no downloads required.
+                  The #1 free Loom alternative for fast-moving teams. Record your screen in HD with NO download required. Share professional video messages instantly with one-click cloud upload.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-2 justify-center lg:justify-start">
@@ -337,10 +337,10 @@ export default function LandingPage() {
                 Workflow
               </p>
               <h2 className="text-4xl sm:text-5xl font-bold text-[hsl(var(--foreground))] mb-6">
-                From Screen to Share in Seconds
+                Fastest Free Screen Recording & Sharing
               </h2>
               <p className="text-xl text-[hsl(var(--muted-foreground))] max-w-2xl mx-auto">
-                No complicated setup, no installations — we removed the friction so you can focus on the content.
+                No complicated setup, no installations. Record screen sessions, provide feedback, and share tutorials in seconds.
               </p>
             </div>
 
