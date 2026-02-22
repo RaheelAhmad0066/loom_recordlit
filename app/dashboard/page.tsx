@@ -361,7 +361,7 @@ export default function DashboardPage() {
                             <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg shadow-slate-200 overflow-hidden">
                                 <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-2" />
                             </div>
-                            <h1 className="text-2xl font-black text-[hsl(var(--foreground))] hidden md:block tracking-tighter">
+                            <h1 className="text-2xl font-bold text-[hsl(var(--foreground))] hidden md:block tracking-tighter">
                                 Record<span className="text-gradient">ly</span>
                             </h1>
                         </Link>
@@ -769,7 +769,7 @@ export default function DashboardPage() {
                                     <HelpCircle className="w-10 h-10 text-violet-500" />
                                 </div>
                                 <h3 className="text-2xl font-bold mb-2">Need Help?</h3>
-                                <p className="text-[hsl(var(--muted-foreground))] mb-8 text-lg">Our team is here to help you get the most out of RecordIt.</p>
+                                <p className="text-[hsl(var(--muted-foreground))] mb-8 text-lg">Our team is here to help you get the most out of Recordly.</p>
                                 <Button variant="default" className="w-full h-12 rounded-xl">Contact Support</Button>
                             </div>
                         ) : null}

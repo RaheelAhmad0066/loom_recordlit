@@ -1,5 +1,6 @@
 import {
     GoogleAuthProvider,
+    OAuthProvider,
     signInWithPopup,
     signOut as firebaseSignOut,
     onAuthStateChanged as firebaseOnAuthStateChanged,
@@ -25,6 +26,21 @@ export async function signInWithGoogle(): Promise<{ user: FirebaseUser; accessTo
     } catch (error: any) {
         console.error('Error signing in with Google:', error);
         throw new Error(error.message || 'Failed to sign in with Google');
+    }
+}
+
+export async function signInWithApple(): Promise<{ user: FirebaseUser }> {
+    const appleProvider = new OAuthProvider('apple.com');
+    // Apple often requires these scopes for display name and email
+    appleProvider.addScope('email');
+    appleProvider.addScope('name');
+
+    try {
+        const result = await signInWithPopup(auth, appleProvider);
+        return { user: result.user };
+    } catch (error: any) {
+        console.error('Error signing in with Apple:', error);
+        throw new Error(error.message || 'Failed to sign in with Apple');
     }
 }
 

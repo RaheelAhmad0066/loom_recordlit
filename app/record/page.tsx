@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Video, Mic, MicOff, VideoIcon, VideoOff, Circle, ArrowLeft, Edit2, Pause, Play, Square, Home, RotateCcw, Copy, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { Video, Mic, MicOff, VideoIcon, VideoOff, Circle, ArrowLeft, Edit2, Pause, Play, Square, Home, RotateCcw, Copy, CheckCircle, AlertCircle, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils/cn';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { saveRecording } from '@/lib/firebase/firestore';
 import { uploadToDrive } from '@/lib/utils/drive';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 import { WebcamOverlay } from '@/components/recording/WebcamOverlay';
+import { Modal } from '@/components/ui/Modal';
 
 type Phase = 'setup' | 'countdown' | 'recording' | 'preview' | 'processing' | 'complete' | 'error';
 
@@ -29,6 +30,8 @@ export default function RecordPage() {
     const [shareLink, setShareLink] = useState('');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [title, setTitle] = useState('');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 
     // Recording refs
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -242,10 +245,34 @@ export default function RecordPage() {
             clearInterval(renderIntervalRef.current);
         }
 
-        const defaultTitle = `RecordIt-${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        const defaultTitle = `Recordly-${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         setTitle(defaultTitle);
         setPhase('preview');
         setProgress(0);
+    };
+
+    const handleDeleteRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+
+        [screenStreamRef.current, camStreamRef.current, micStreamRef.current].forEach(stream => {
+            stream?.getTracks().forEach(track => track.stop());
+        });
+
+        if (renderIntervalRef.current) {
+            clearInterval(renderIntervalRef.current);
+        }
+
+        chunksRef.current = [];
+        setIsDeleteModalOpen(false);
+        router.push('/dashboard');
+    };
+
+    const handleDiscardRecording = () => {
+        chunksRef.current = [];
+        setIsDiscardModalOpen(false);
+        router.push('/dashboard');
     };
 
     const processRecording = async () => {
@@ -419,12 +446,21 @@ export default function RecordPage() {
 
             {/* ──── Countdown Phase ──── */}
             {phase === 'countdown' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md">
-                    <div className="relative">
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md">
+                    <div className="relative mb-8">
                         <div className="w-32 h-32 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center animate-countdown shadow-2xl shadow-violet-500/40" key={countdown}>
                             <span className="text-6xl font-bold text-white">{countdown || '🎬'}</span>
                         </div>
                     </div>
+
+                    <button
+                        onClick={() => startActualRecording()}
+                        className="text-white/70 hover:text-white transition-colors flex items-center gap-2 group"
+                    >
+                        <span className="text-sm font-bold uppercase tracking-[0.2em]">Skip Countdown</span>
+                        <Play className="w-4 h-4 fill-current group-hover:translate-x-1 transition-transform" />
+                    </button>
+
                     {includeCam && camStream && <WebcamOverlay stream={camStream} />}
                 </div>
             )}
@@ -469,6 +505,14 @@ export default function RecordPage() {
                             title="Stop"
                         >
                             <Square className="w-5 h-5 fill-current" />
+                        </button>
+                        <div className="h-6 w-px bg-[hsl(var(--border))]" />
+                        <button
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="p-2.5 hover:bg-red-500/10 rounded-full transition-colors text-red-500"
+                            title="Delete"
+                        >
+                            <Trash2 className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -518,12 +562,7 @@ export default function RecordPage() {
                             </Button>
                             <Button
                                 variant="ghost"
-                                onClick={() => {
-                                    if (confirm('Are you sure? This recording will be discarded.')) {
-                                        setPhase('setup');
-                                        chunksRef.current = [];
-                                    }
-                                }}
+                                onClick={() => setIsDiscardModalOpen(true)}
                                 className="text-[hsl(var(--muted-foreground))] hover:text-red-500"
                             >
                                 Discard Recording
@@ -532,6 +571,27 @@ export default function RecordPage() {
                     </div>
                 </div>
             )}
+
+            {/* Modals */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteRecording}
+                title="Delete Recording?"
+                description="Are you sure you want to delete this recording? This action cannot be undone."
+                confirmLabel="Delete"
+                type="destructive"
+            />
+
+            <Modal
+                isOpen={isDiscardModalOpen}
+                onClose={() => setIsDiscardModalOpen(false)}
+                onConfirm={handleDiscardRecording}
+                title="Discard Recording?"
+                description="This recording will be permanently discarded. Are you sure?"
+                confirmLabel="Discard"
+                type="destructive"
+            />
 
             {/* ──── Processing Phase ──── */}
             {phase === 'processing' && (

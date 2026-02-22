@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "recordly-screen-recorder",
     "public": "out",
     "ignore": [
       "firebase.json",

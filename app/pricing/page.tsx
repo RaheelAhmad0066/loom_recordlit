@@ -76,7 +76,7 @@ export default function PricingPage() {
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-lg shadow-indigo-100 overflow-hidden">
                                 <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1.5" />
                             </div>
-                            <span className="text-2xl font-black text-[hsl(var(--foreground))] tracking-tighter">
+                            <span className="text-2xl font-bold text-[hsl(var(--foreground))] tracking-tighter">
                                 Record<span className="text-gradient">ly</span>
                             </span>
                         </Link>
@@ -213,7 +213,7 @@ export default function PricingPage() {
                         <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center overflow-hidden">
                             <img src="/logo.png" alt="Recordly Logo" className="w-full h-full object-contain p-1" />
                         </div>
-                        <span className="text-lg font-black text-[hsl(var(--foreground))] tracking-tighter">Recordly</span>
+                        <span className="text-lg font-bold text-[hsl(var(--foreground))] tracking-tighter">Recordly</span>
                     </div>
                     <p className="text-sm text-[hsl(var(--muted-foreground))]">© 2024 Recordly. All rights reserved.</p>
                 </div>
