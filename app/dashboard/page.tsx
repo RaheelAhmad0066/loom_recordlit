@@ -16,6 +16,7 @@ import { Sidebar, TabId } from '@/components/dashboard/Sidebar';
 import { VideoPlayer } from '@/components/dashboard/VideoPlayer';
 import { Modal } from '@/components/ui/Modal';
 import { uploadVideo, getShareableLink } from '@/lib/drive/client';
+import AdBanner from '@/components/AdBanner';
 
 function formatDuration(seconds: number) {
     const m = Math.floor(seconds / 60);
@@ -499,6 +500,12 @@ export default function DashboardPage() {
                         {/* ──── Dynamic Content Based on activeTab ──── */}
                         {(activeTab === 'library' || activeTab === 'recent' || activeTab === 'starred') ? (
                             <>
+                                {/* AdSense Banner */}
+                                <AdBanner
+                                    dataAdSlot="1234567890"
+                                    className="max-w-6xl mx-auto rounded-2xl overflow-hidden bg-[hsl(var(--accent)/0.3)] border border-[hsl(var(--border)/0.5)]"
+                                />
+
                                 {loading && recordings.length === 0 ? (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                         {[1, 2, 3].map(i => (

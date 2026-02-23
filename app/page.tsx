@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import AdBanner from '@/components/AdBanner';
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -328,6 +329,14 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* AdSense Banner */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <AdBanner
+            dataAdSlot="9876543210"
+            className="rounded-3xl overflow-hidden bg-[hsl(var(--accent)/0.3)] border border-[hsl(var(--border)/0.5)]"
+          />
+        </div>
 
         {/* ──────────── How It Works ──────────── */}
         <section id="how-it-works" className="py-24 sm:py-32">

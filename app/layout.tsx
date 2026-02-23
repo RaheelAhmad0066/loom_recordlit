@@ -15,7 +15,7 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://recordly.dev'),
+  metadataBase: new URL('https://recordly-screen-recorder.web.app'),
   title: {
     default: 'Recordly - #1 Free Online Screen Recorder | Best Loom Alternative | No Download',
     template: '%s | Recordly'
@@ -24,12 +24,12 @@ export const metadata: Metadata = {
   keywords: ['online screen recorder', 'free screen recorder', 'no download screen recorder', 'best loom alternative', 'chrome screen recorder', 'screen recording software free', 'screen capture online', 'recordly', 'product demo videos', 'tutorial maker'],
   authors: [{ name: 'Recordly Team' }],
   alternates: {
-    canonical: 'https://recordly.dev',
+    canonical: 'https://recordly-screen-recorder.web.app',
   },
   openGraph: {
     title: 'Recordly - High-Performance Screen Recording',
-    description: 'Instant screen recording and sharing. Professional-grade tool for modern teams.',
-    url: 'https://recordly.dev',
+    description: '100% Free online screen recorder. Capture your screen, webcam, and audio in HD. Share instantly with Recordly Screen Recorder.',
+    url: 'https://recordly-screen-recorder.web.app',
     siteName: 'Recordly',
     images: [
       {
@@ -61,7 +61,10 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code', // Placeholder
+    google: 'VrlqCtQMTuy3SU3IEyS0R3Iez9E8z-8yq7g7o8I69tU',
+    other: {
+      'google-adsense-account': 'ca-pub-7554459613230587',
+    },
   }
 };
 
@@ -90,6 +93,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${inter.variable}`}>
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7554459613230587"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={outfit.className} suppressHydrationWarning={true}>
         <ThemeProvider>
           <AuthProvider>
